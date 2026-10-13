@@ -15,7 +15,7 @@ async function submit(key:Uint8Array,kind:number,content:string,tags:string[][])
   const event=finalizeEvent({kind,content,tags,created_at:Math.floor(Date.now()/1000)},key);
   const body=JSON.stringify(event);const url=relay+'/events';
   const response=await fetch(url,{method:'POST',redirect:'error',signal:AbortSignal.timeout(20000),headers:{'Content-Type':'application/json',Authorization:authHeader(key,url,body)},body});
-  assert.equal(response.status,200,`Synthetic setup rejected with HTTP ${response.status}`);
+  if(response.status!==200)throw new Error(`Disposable setup kind ${kind} HTTP ${response.status}: ${(await response.text()).slice(0,1000)}`);
   const result=await response.json() as {accepted?:boolean;message?:string};
   assert.equal(result.accepted,true,'Synthetic setup event was rejected');return {event,result};
 }
@@ -54,8 +54,9 @@ try{
     if(uploaded.status!==404&&uploaded.status!==405)break;await uploaded.body?.cancel();
   }
   if(!uploaded?.ok){const detail=uploaded?(await uploaded.text()).slice(0,1000):'No response';throw new Error(`Disposable fixture upload HTTP ${uploaded?.status}: ${detail}`);}
-  const descriptor=await uploaded.json() as {url:string;sha256:string};assert.equal(descriptor.sha256,digest);
-  const attachment=(await submit(alice,9,'upstream-image-parent',[['h',ach],['imeta',`url ${descriptor.url}`,`x ${digest}`,'m image/png']])).event;
+  const descriptor=await uploaded.json() as {url:string;sha256:string;type:string;size:number;dim?:string};assert.equal(descriptor.sha256,digest);
+  const imeta=['imeta',`url ${descriptor.url}`,`x ${digest}`,`m ${descriptor.type}`,`size ${descriptor.size}`,...(descriptor.dim?[`dim ${descriptor.dim}`]:[])];
+  const attachment=(await submit(alice,9,'upstream-image-parent',[['h',ach],imeta])).event;
   assert.equal((await a.attachment(attachment.id,ach,0)).status,'image');
   await assert.rejects(()=>b.attachment(attachment.id,ach,0));
   // Add and revoke a disposable user on an isolated channel; never operate on production membership.
