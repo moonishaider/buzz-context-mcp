@@ -1,6 +1,7 @@
 // Actual isolated Buzz image integration. Not shipped, and never accepts a production URL.
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
+import { deflateSync } from 'node:zlib';
 import { finalizeEvent,generateSecretKey,getPublicKey } from 'nostr-tools/pure';
 import { BuzzClient } from '../src/client.js';
 import { BuzzReader } from '../src/reader.js';
@@ -39,7 +40,10 @@ try{
   const reply=(await submit(alice,9,'upstream-direct-reply',[['h',ach],['e',am.id,'','reply']])).event;
   assert.equal((await a.thread(reply.id,ach)).root.event_id,am.id);
   // Upload is test setup only, fixed to loopback and excluded from the MCP package.
-  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jP1sAAAAASUVORK5CYII=','base64');const digest=hash(png);
+  const crc=(data:Uint8Array)=>{let value=0xffffffff;for(const byte of data){value^=byte;for(let bit=0;bit<8;bit++)value=(value>>>1)^((value&1)?0xedb88320:0);}return (value^0xffffffff)>>>0;};
+  const chunk=(name:string,data:Uint8Array)=>{const body=Buffer.concat([Buffer.from(name),data]);const n=Buffer.alloc(4),c=Buffer.alloc(4);n.writeUInt32BE(data.length);c.writeUInt32BE(crc(body));return Buffer.concat([n,body,c]);};
+  const ihdr=Buffer.alloc(13);ihdr.writeUInt32BE(1,0);ihdr.writeUInt32BE(1,4);ihdr[8]=8;ihdr[9]=6;
+  const png=Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',ihdr),chunk('IDAT',deflateSync(Buffer.from([0,40,80,120,255]))),chunk('IEND',new Uint8Array())]);const digest=hash(png);
   const uploadAuth=()=>{
     const event=finalizeEvent({kind:24242,created_at:Math.floor(Date.now()/1000),content:'Disposable fixture upload',tags:[['t','upload'],['x',digest],['expiration',String(Math.floor(Date.now()/1000)+60)],['server','127.0.0.1:18580'],['nonce',randomUUID()]]},alice);
     return `Nostr ${Buffer.from(JSON.stringify(event)).toString('base64url')}`;
@@ -49,7 +53,7 @@ try{
     uploaded=await fetch(relay+path,{method:'PUT',redirect:'error',signal:AbortSignal.timeout(20000),headers:{Authorization:uploadAuth(),'Content-Type':'image/png','X-SHA-256':digest},body:png});
     if(uploaded.status!==404&&uploaded.status!==405)break;await uploaded.body?.cancel();
   }
-  assert.ok(uploaded?.ok,'Disposable PNG upload must succeed');
+  if(!uploaded?.ok){const detail=uploaded?(await uploaded.text()).slice(0,1000):'No response';throw new Error(`Disposable fixture upload HTTP ${uploaded?.status}: ${detail}`);}
   const descriptor=await uploaded.json() as {url:string;sha256:string};assert.equal(descriptor.sha256,digest);
   const attachment=(await submit(alice,9,'upstream-image-parent',[['h',ach],['imeta',`url ${descriptor.url}`,`x ${digest}`,'m image/png']])).event;
   assert.equal((await a.attachment(attachment.id,ach,0)).status,'image');
