@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { finalizeEvent,generateSecretKey,getPublicKey } from 'nostr-tools/pure';
 import { BuzzClient } from '../src/client.js';
 import { BuzzReader } from '../src/reader.js';
-import { authHeader } from '../src/protocol.js';
+import { authHeader,hash } from '../src/protocol.js';
 if(process.env.BUZZ_CONTEXT_UPSTREAM_TEST!=='disposable-ci-only')throw new Error('Isolated test mode required.');
 const relay='http://127.0.0.1:18580';
 const alice=generateSecretKey(),bob=generateSecretKey(),guest=generateSecretKey();
@@ -33,10 +33,27 @@ try{
   assert.match(JSON.stringify(await b.history(bch)),/upstream-bob-only/);
   await assert.rejects(()=>a.history(bch));await assert.rejects(()=>a.get(bm.id,bch));
   await assert.rejects(()=>a.thread(bm.id,bch));await assert.rejects(()=>a.attachments(bm.id,bch));
-  assert.doesNotMatch(JSON.stringify(await a.search('upstream')),/upstream-bob-only/);
+  const search=JSON.stringify(await a.search('upstream'));
+  assert.match(search,/upstream-alice-only/);assert.doesNotMatch(search,/upstream-bob-only/);
   assert.doesNotMatch(JSON.stringify(await ac.query({kinds:[9],ids:[bm.id],limit:1})),/upstream-bob-only/);
   const reply=(await submit(alice,9,'upstream-direct-reply',[['h',ach],['e',am.id,'','reply']])).event;
   assert.equal((await a.thread(reply.id,ach)).root.event_id,am.id);
+  // Upload is test setup only, fixed to loopback and excluded from the MCP package.
+  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jP1sAAAAASUVORK5CYII=','base64');const digest=hash(png);
+  const uploadAuth=()=>{
+    const event=finalizeEvent({kind:24242,created_at:Math.floor(Date.now()/1000),content:'Disposable fixture upload',tags:[['t','upload'],['x',digest],['expiration',String(Math.floor(Date.now()/1000)+60)],['server','127.0.0.1:18580'],['nonce',randomUUID()]]},alice);
+    return `Nostr ${Buffer.from(JSON.stringify(event)).toString('base64url')}`;
+  };
+  let uploaded:Response|undefined;
+  for(const path of ['/upload','/media/upload']){
+    uploaded=await fetch(relay+path,{method:'PUT',redirect:'error',signal:AbortSignal.timeout(20000),headers:{Authorization:uploadAuth(),'Content-Type':'image/png','X-SHA-256':digest},body:png});
+    if(uploaded.status!==404&&uploaded.status!==405)break;await uploaded.body?.cancel();
+  }
+  assert.ok(uploaded?.ok,'Disposable PNG upload must succeed');
+  const descriptor=await uploaded.json() as {url:string;sha256:string};assert.equal(descriptor.sha256,digest);
+  const attachment=(await submit(alice,9,'upstream-image-parent',[['h',ach],['imeta',`url ${descriptor.url}`,`x ${digest}`,'m image/png']])).event;
+  assert.equal((await a.attachment(attachment.id,ach,0)).status,'image');
+  await assert.rejects(()=>b.attachment(attachment.id,ach,0));
   // Add and revoke a disposable user on an isolated channel; never operate on production membership.
   await submit(alice,9000,'',[['h',ach],['p',getPublicKey(bob)],['role','member']]);
   assert.match(JSON.stringify(await b.history(ach)),/upstream-alice-only/);
@@ -49,6 +66,7 @@ try{
   const dmId=detail.channel_id??requested;
   await submit(alice,9,'upstream-private-dm',[['h',dmId]]);
   assert.match(JSON.stringify(await a.history(dmId)),/upstream-private-dm/);
+  assert.match(JSON.stringify(await a.dms()),new RegExp(dmId));
   await assert.rejects(()=>b.history(dmId));assert.doesNotMatch(JSON.stringify(await b.dms()),new RegExp(dmId));
-  console.log(JSON.stringify({passed:true,scope:'isolated official Buzz image; disposable identities only',checks:['private-history','direct-ids','search','threads','attachment-parent','membership-revocation','DM-isolation']}));
+  console.log(JSON.stringify({passed:true,scope:'isolated official Buzz image; disposable identities only',checks:['private-history','direct-ids','positive-and-private-search','threads','hashed-image-extraction-and-private-parent','membership-revocation','positive-and-private-DM-discovery']}));
 }finally{ac.dispose();bc.dispose();alice.fill(0);bob.fill(0);guest.fill(0);}
