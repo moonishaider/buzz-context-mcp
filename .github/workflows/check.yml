@@ -16,7 +16,7 @@ jobs:
           POSTGRES_PASSWORD: fixture
           POSTGRES_DB: buzzfixture
         ports: ['18543:5432']
-        options: --health-cmd "pg_isready -U fixture" --health-interval 5s --health-timeout 5s --health-retries 10
+        options: --health-cmd "pg_isready -U fixture -d buzzfixture" --health-interval 5s --health-timeout 5s --health-retries 10
       redis:
         image: redis:7-alpine
         ports: ['18679:6379']
