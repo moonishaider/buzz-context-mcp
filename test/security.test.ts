@@ -83,3 +83,12 @@ test('long event content is retrieved in bounded immutable chunks with fresh acc
   const last=await reader.text(event.id,A,8000,4000);assert.equal(last.next_offset,null);assert.match(last.text,/suffix$/);
   f.allowed.get(f.ap)!.delete(A);await assert.rejects(()=>reader.text(event.id,A,4000,4000),/accessible channel\/DM/);
 });
+test('Buzz direct-reply and nested NIP-10 markers resolve the actual thread root',async t=>{
+  const f=await fixture();t.after(f.close);const client=new BuzzClient(f.origin,f.alice,{testLoopback:true});t.after(()=>client.dispose());const reader=new BuzzReader(client);
+  const root=f.sign(9,'Synthetic root',[['h',A]],1700000002);
+  const direct=f.sign(9,'Synthetic direct reply',[['h',A],['e',root.id,'','reply']],1700000003);
+  const nested=f.sign(9,'Synthetic nested reply',[['h',A],['e',root.id,'','root'],['e',direct.id,'','reply']],1700000004);
+  f.events.push(root,direct,nested);
+  const first=await reader.thread(direct.id,A);assert.equal(first.root.event_id,root.id);assert.ok(first.events.some(e=>e.event_id===nested.id));
+  const second=await reader.thread(nested.id,A);assert.equal(second.root.event_id,root.id);
+});

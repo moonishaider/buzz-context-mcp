@@ -3,7 +3,7 @@ import type { Event } from 'nostr-tools/pure';
 import { neventEncode } from 'nostr-tools/nip19';
 import { BuzzClient } from './client.js';
 import { ReaderError } from './errors.js';
-import { channelId, eventChannel, hash, hex, MESSAGE_KINDS, tags, type Filter } from './protocol.js';
+import { channelId, eventChannel, hash, hex, MESSAGE_KINDS, type Filter } from './protocol.js';
 import { extractAttachment } from './extract.js';
 
 const cursorSchema = z.object({scope:hex,until:z.number().int().nonnegative(),seen:z.array(hex).max(500)}).strict();
@@ -86,10 +86,17 @@ export class BuzzReader {
       warning:'Search paging requires the relay page extension. Repeated IDs mean the relay does not support paging; do not claim completion.'};
   }
   async thread(id:string,channel:string,options:PageOptions={}) {
-    const selected=await this.get(id,channel);
-    const marked=selected.tags.filter(t=>t[0]==='e'&&t[3]==='root');
-    if(marked.length>1) throw new ReaderError('INVALID_EVENT','Ambiguous thread root.');
-    const root=marked[0]?.[1]??(selected.kind===45003?tags(selected,'e')[0]:undefined)??selected.id;
+    let selected=await this.get(id,channel);let root=selected.id;const visited=new Set<string>();
+    for(let depth=0;depth<20;depth++){
+      if(visited.has(selected.id))throw new ReaderError('INVALID_EVENT','Cyclic thread references.');visited.add(selected.id);
+      const marked=selected.tags.filter(t=>t[0]==='e'&&t[3]==='root');
+      const parents=selected.tags.filter(t=>t[0]==='e'&&t[3]==='reply');
+      if(marked.length>1||parents.length>1)throw new ReaderError('INVALID_EVENT','Ambiguous thread root or parent.');
+      if(marked[0]?.[1]){root=marked[0][1];break;}
+      if(!parents[0]?.[1]){root=selected.id;break;}
+      if(depth===19)throw new ReaderError('OPERATION_LIMIT','Thread parent chain exceeds the bounded traversal limit.');
+      hex.parse(parents[0][1]);selected=await this.get(parents[0][1],channel);
+    }
     hex.parse(root);
     const rootEvent=await this.get(root,channel);
     // Conservative bounded traversal of the channel history avoids trusting relay-specific thread paging.
