@@ -5,7 +5,12 @@ import type { Extraction } from './extract.js';
 
 let bytes:Uint8Array;
 let mime:string;
-const MAX_TEXT=20000;
+// Bound total extraction separately from each MCP response section.
+const MAX_TEXT=1000000;
+const MAX_PDF_PAGES=200;
+let filename='';
+let declaredType='';
+let archiveFiles:Map<string,Uint8Array>|undefined;
 const clip=(text:string):Extraction=>({status:'extracted',format:mime,text:text.slice(0,MAX_TEXT),truncated:text.length>MAX_TEXT});
 function record(value:unknown):Record<string,unknown>{return value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,unknown>:{};}
 function list(value:unknown):unknown[]{return value===undefined?[]:Array.isArray(value)?value:[value];}
@@ -20,6 +25,7 @@ function xml(data:Uint8Array):Record<string,unknown>{
   return record(new XMLParser({ignoreAttributes:false,processEntities:false,parseTagValue:false,removeNSPrefix:true}).parse(s));
 }
 function archive():Map<string,Uint8Array>{
+  if(archiveFiles)return archiveFiles;
   const files=new Map<string,Uint8Array>(); let total=0;let count=0;
   const unzip=new Unzip(file=>{
     if(++count>500)throw new Error('Too many archive entries');
@@ -35,12 +41,41 @@ function archive():Map<string,Uint8Array>{
   });
   unzip.register(UnzipInflate);
   for(let at=0;at<bytes.length;at+=4096)unzip.push(bytes.subarray(at,at+4096),at+4096>=bytes.length);
-  return files;
+  archiveFiles=files;return files;
+}
+function readableText():string{
+  const value=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+  // Reject binary controls even if an untrusted name claims it is a text file.
+  if(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value))throw new Error('Not plain text');
+  return value;
+}
+function detectedFormat():string{
+  const b=Buffer.from(bytes);
+  if(b.subarray(0,5).toString()==='%PDF-')return 'application/pdf';
+  if(b.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))return 'image/png';
+  if(b[0]===255&&b[1]===216&&b[2]===255)return 'image/jpeg';
+  if(/^GIF8[79]a$/.test(b.subarray(0,6).toString()))return 'image/gif';
+  if(b.subarray(0,4).toString()==='RIFF'&&b.subarray(8,12).toString()==='WEBP')return 'image/webp';
+  if(b[0]===80&&b[1]===75){
+    const files=archive(),word=files.has('word/document.xml'),sheet=[...files.keys()].some(k=>k.startsWith('xl/worksheets/'));
+    if(word&&!sheet)return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    if(sheet&&!word)return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    throw new Error('Unsupported archive');
+  }
+  // Known binary declarations without matching signatures must not become text.
+  const types=[mime,declaredType].map(t=>t.split(';')[0]!.trim().toLowerCase());
+  if(types.some(t=>t.startsWith('image/')||t==='application/pdf'||t.includes('officedocument')))return mime;
+  const hint=filename.toLowerCase().match(/\.(txt|md|markdown|csv|tsv|vtt|srt)$/)?.[1];
+  if(types.includes('text/csv')||hint==='csv')return 'text/csv';
+  if(types.includes('text/markdown')||hint==='md'||hint==='markdown')return 'text/markdown';
+  if(types.some(t=>['text/plain','text/vtt','application/x-subrip','text/tab-separated-values'].includes(t))||hint)return 'text/plain';
+  return mime;
 }
 async function extract():Promise<Extraction>{
-  if(mime==='text/plain'||mime==='text/markdown') return clip(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+  mime=detectedFormat();
+  if(mime==='text/plain'||mime==='text/markdown') return clip(readableText());
   if(mime==='text/csv') {
-    const rows=parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes),{to:100,relax_column_count:true,max_record_size:100000}) as unknown[][];
+    const rows=parse(readableText(),{to:100,relax_column_count:true,max_record_size:100000}) as unknown[][];
     return {...clip(rows.map(row=>row.slice(0,30).map(v=>String(v)).join('\t')).join('\n')),truncated:true,reason:'At most 100 rows and 30 columns; formulas are not evaluated.'};
   }
   if(mime.startsWith('image/')){
@@ -57,12 +92,14 @@ async function extract():Promise<Extraction>{
     const {getDocument}=await import('pdfjs-dist/legacy/build/pdf.mjs');
     const task=getDocument({data:bytes,disableFontFace:true,useSystemFonts:false,stopAtErrors:true});
     try{
-      const doc=await task.promise;let output='';const n=Math.min(doc.numPages,20);
+      const doc=await task.promise;let output='';let pagesRead=0;const n=Math.min(doc.numPages,MAX_PDF_PAGES);
       for(let p=1;p<=n&&output.length<MAX_TEXT;p++){
         const page=await doc.getPage(p);const content=await page.getTextContent();
-        output+=`\n[Page ${p}]\n`+content.items.map(item=>'str' in item?item.str:'').join(' ');page.cleanup();
+        output+=`\n[Page ${p}]\n`+content.items.map(item=>'str' in item?item.str:'').join(' ');page.cleanup();pagesRead=p;
       }
-      return {...clip(output),truncated:doc.numPages>20||output.length>MAX_TEXT,reason:'Text only; no OCR. At most 20 pages.'};
+      const result={...clip(output),truncated:pagesRead<doc.numPages||output.length>MAX_TEXT,reason:'Text only; no OCR. At most 200 pages and 1,000,000 characters.'};
+      if(!output.replace(/\[Page \d+\]/g,'').trim())return {status:'unsupported',format:mime,reason:'No readable text was found. This PDF may need OCR or contain only blank pages.'};
+      return result;
     }finally{await task.destroy();}
   }
   if(mime==='application/vnd.openxmlformats-officedocument.wordprocessingml.document'){
@@ -88,9 +125,9 @@ async function extract():Promise<Extraction>{
     }
     return {...clip(output),truncated:truncated||sheets.length>5||output.length>MAX_TEXT,reason:'Raw stored cell values; formatting and formulas are not evaluated. At most 5 sheets, 100 rows/sheet, 30 cells/row.'};
   }
-  return {status:'unsupported',format:mime,reason:'No safe first-release extraction path for this MIME type.'};
+  return {status:'unsupported',format:mime,reason:'This file format is not supported. Text, PDF, DOCX, CSV, XLSX and supported images can be read.'};
 }
 process.once('message',input=>{
-  const data=input as {bytes:Uint8Array;type:string};bytes=data.bytes;mime=data.type;
-  void extract().then(value=>process.send?.(value),()=>process.send?.({status:'unsupported',format:mime,reason:'Malformed, encrypted, over-limit or unsupported attachment.'} satisfies Extraction));
+  const data=input as {bytes:Uint8Array;type:string;filename?:string;declaredType?:string};bytes=data.bytes;mime=data.type;filename=data.filename??'';declaredType=data.declaredType??'';
+  void extract().then(value=>process.send?.(value),()=>process.send?.({status:'unsupported',format:mime,reason:'The file could not be read. It may be damaged, encrypted, binary or beyond the supported processing limits.'} satisfies Extraction));
 });
