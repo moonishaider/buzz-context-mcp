@@ -8,3 +8,5 @@ coverage/
 *.nsec
 *.ncryptsec
 .DS_Store
+
+.installation.json

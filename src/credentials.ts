@@ -20,11 +20,17 @@ export async function loadKey(name:string,profile:Profile):Promise<Uint8Array>{
 }
 export async function storeKey(name:string,profile:Profile,key:Uint8Array):Promise<void>{
   if(key.length!==32||publicKey(key)!==profile.pubkey)throw new ReaderError('IDENTITY_MISMATCH','The supplied key does not match the expected public identity.');
+  let e:AsyncEntry|undefined;
   try{
-    const e=entry(name,profile);await e.setSecret(key);const check=await e.getSecret();
+    e=entry(name,profile);await e.setSecret(key);const check=await e.getSecret();
     if(!check||check.length!==32||publicKey(Uint8Array.from(check))!==profile.pubkey){check?.fill(0);await e.deleteCredential();throw new Error();}
     check.fill(0);
-  }catch{throw new ReaderError('SECURE_STORE_UNAVAILABLE','Secure credential storage or verification failed. No plaintext fallback is used.');}
+  }catch{
+    // A write can succeed before verification fails. Remove that partial copy.
+    try{await e?.deleteCredential();}
+    catch{throw new ReaderError('SECURE_STORE_UNAVAILABLE','Secure storage failed and credential cleanup could not be confirmed. No profile was activated. Unlock the OS store and ask the maintainer to remove only this connector-owned credential entry before retrying.');}
+    throw new ReaderError('SECURE_STORE_UNAVAILABLE','Secure credential storage or verification failed. No plaintext fallback is used.');
+  }
 }
 export async function deleteKey(name:string,profile:Profile):Promise<void>{
   try{await entry(name,profile).deleteCredential();}

@@ -35,3 +35,7 @@ Final approval must identify the exact two PR heads, release artifact/version, p
 ## Announcement preparation
 
 A team announcement may describe the independent read-only alpha, per-user local credential provisioning, supported environments and limitations. It must link to verified public installation instructions and the actual released artifact. Keep the announcement as a draft until publication and post-publication installation succeed. The owner sends it; no team outreach is authorized here.
+
+## Browser onboarding candidate
+
+0.1.0-alpha.2 adds optional hidden Terminal setup alongside a default local browser form, shared storage/authentication checks, partial-write cleanup and supported source-version metadata/preparation. It is intended to remove human-supplied commit hashes after default-branch merge. Review the browser request boundaries in SECURITY.md and evidence limits in VERIFICATION.md. Existing private PR #1 contains the complete read-only reader plus this onboarding update; merging it affects the entire candidate, not only the form. Merge approval and public publication are separate; no public release is requested by this implementation alone. Human production/UI acceptance and native Windows/Linux client workflows remain outstanding.

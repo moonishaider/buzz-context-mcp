@@ -2,14 +2,15 @@
 import { parseArgs } from 'node:util';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StringDecoder } from 'node:string_decoder';
-import { decodeSecret } from './secret-input.js';
+import { provision } from './provision.js';
+import { startSetupServer, openSetupBrowser } from './setup-server.js';
 import { BuzzClient } from './client.js';
 import { BuzzReader } from './reader.js';
 import { createServer } from './server.js';
-import { getProfile, profileName, readConfig, saveProfile, withConfigLock } from './config.js';
-import { deleteKey, loadKey, storeKey } from './credentials.js';
+import { getProfile, profileName, saveProfile, withConfigLock } from './config.js';
+import { deleteKey, loadKey } from './credentials.js';
 import { ReaderError, safeError } from './errors.js';
-import { hex, normalizeRelay, publicKey } from './protocol.js';
+import { hex, normalizeRelay } from './protocol.js';
 
 export async function hiddenInput(prompt:string):Promise<string>{
   if(!process.stdin.isTTY||!process.stderr.isTTY)throw new ReaderError('HUMAN_REQUIRED','Provisioning requires a human-controlled interactive terminal. Secrets via pipes or arguments are refused.');
@@ -32,34 +33,35 @@ export async function hiddenInput(prompt:string):Promise<string>{
 }
 async function main(){
   if(Number(process.versions.node.split('.')[0])!==24||Number(process.versions.node.split('.')[1])<14)throw new ReaderError('RUNTIME_REQUIRED','Use Node.js 24.14 or newer within the Node 24 release line.');
-  const {values,positionals}=parseArgs({allowPositionals:true,options:{profile:{type:'string',default:'default'},relay:{type:'string'},pubkey:{type:'string'},help:{type:'boolean'}}});
+  const {values,positionals}=parseArgs({allowPositionals:true,options:{profile:{type:'string',default:'default'},relay:{type:'string'},pubkey:{type:'string'},method:{type:'string',default:'browser'},help:{type:'boolean'}}});
   const command=values.help?'help':positionals[0]??'help';const name=profileName.parse(values.profile);
   if(command==='help'){
-    console.log('Buzz Context MCP (private alpha)\nCommands: configure, serve, status, doctor, disconnect\nOptions: --profile NAME, --relay HTTPS_ORIGIN, --pubkey EXPECTED_HEX\nconfigure requires a human TTY and stores the key only in the connector OS credential entry.\nNever provide a secret key as an argument, environment variable or chat message.');return;
+    console.log('Buzz Context MCP (private alpha)\nCommands: configure, serve, status, doctor, disconnect\nOptions: --profile NAME, --relay HTTPS_ORIGIN, --pubkey EXPECTED_HEX, --method browser|terminal\nconfigure opens a local browser form by default; --method terminal uses hidden human TTY input. Both store the key only in the connector OS credential entry.\nNever provide a secret key as an argument, environment variable or chat message.');return;
   }
   if(command==='configure'){
-    return withConfigLock(async()=>{
+    if(values.method!=='browser'&&values.method!=='terminal')throw new ReaderError('INVALID_INPUT','Choose --method browser or --method terminal.');
+    if(values.method==='browser'){
+      const relay=values.relay?normalizeRelay(values.relay):undefined;const pubkey=values.pubkey?hex.parse(values.pubkey):undefined;
+      const session=await startSetupServer({profile:name,relay,pubkey,configure:(input,active)=>provision(name,input,active)});
+      const cancel=()=>session.close();process.once('SIGINT',cancel);process.once('SIGTERM',cancel);
+      process.stderr.write(`Local setup link (expires in five minutes; do not share): ${session.url}\n`);
+      // Do not block session expiry on a desktop opener that never exits.
+      void openSetupBrowser(session.url).catch(()=>process.stderr.write('Open the local setup link in your own browser to continue.\n'));
+      try{const result=await session.done;console.log(JSON.stringify({profile:name,...result}));if(!result.configured)process.exitCode=1;}
+      finally{process.off('SIGINT',cancel);process.off('SIGTERM',cancel);session.close();}
+      return;
+    }
     const relay=normalizeRelay(values.relay??'');const pubkey=hex.parse(values.pubkey);
-    const profiles=(await readConfig()).profiles;
-    if(Object.hasOwn(profiles,name))throw new ReaderError('PROFILE_EXISTS','Profile already exists. Disconnect it explicitly before reprovisioning.');
     process.stderr.write('This local reader uses your identity key, which can authorize more than reading. It is not a revocable read-only token.\nOnly proceed after reviewing SECURITY.md. Never paste the key into a model conversation.\n');
     if(await hiddenInput('Type LOCAL-READ to authorize local key custody: ')!=='LOCAL-READ')throw new ReaderError('CANCELLED','Provisioning not authorized.');
-    let secret=await hiddenInput('Your own nsec/hex key or encrypted ncryptsec backup (hidden): ');let key:Uint8Array;
+    let secret=await hiddenInput('Your own nsec/hex key or encrypted ncryptsec backup (hidden): ');let password='';
     try{
-      if(secret.startsWith('ncryptsec')){let password=await hiddenInput('Backup password (hidden): ');key=decodeSecret(secret,password);password='';}
-      else key=decodeSecret(secret);
-    }catch(e){if(e instanceof ReaderError)throw e;throw new ReaderError('INVALID_KEY','Key or encrypted backup could not be decoded.');}
-    finally{secret='';}
-    const profile={relay,pubkey};const client=new BuzzClient(relay,key);
-    try{
-      if(publicKey(key)!==pubkey)throw new ReaderError('IDENTITY_MISMATCH','The supplied key does not match the expected public identity.');
-      await client.discovery();await client.query({kinds:[0],authors:[pubkey],limit:1});
-      await storeKey(name,profile,key);
-      try{await saveProfile(name,profile);}catch(e){await deleteKey(name,profile);throw e;}
-      console.log(JSON.stringify({configured:true,profile:name,relay,identity:pubkey}));
-    }finally{key.fill(0);client.dispose();}
-    });
+      if(secret.startsWith('ncryptsec'))password=await hiddenInput('Backup password (hidden): ');
+      console.log(JSON.stringify(await provision(name,{relay,pubkey,secret,password,consent:true})));
+    }finally{secret='';password='';}
+    return;
   }
+
   const profile=await getProfile(name,undefined,command==='disconnect');
   if(command==='status'){console.log(JSON.stringify({profile:name,...profile,notice:'Configuration exists; live authentication has not been checked by this command.'}));return;}
   if(command==='disconnect'){

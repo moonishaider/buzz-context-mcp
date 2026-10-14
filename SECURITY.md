@@ -10,7 +10,7 @@ Buzz authenticates signed requests using Nostr identities. The proposed first ve
 
 The user will authorize a protected local copy of their identity key. It resembles a master password: the connector will expose only reading tools, but possession of the key can enable broader actions. A read-only tool catalog does not make the key a read-only credential.
 
-Do not paste a key into Codex, Claude Code, GitHub, a message, an issue or a support conversation. A human-controlled local provisioning flow must keep credentials out of command arguments, client config and logs. Storage will use a connector-owned OS credential entry; it must not silently read Buzz's own keychain entries. Secure-store failures must stop setup rather than fall back to plaintext.
+Do not paste a key into Codex, Claude Code, GitHub, a message, an issue or a support conversation. The browser form and hidden Terminal prompt are human-controlled local provisioning flows and must keep credentials out of command arguments, client config and logs. Storage will use a connector-owned OS credential entry; it must not silently read Buzz's own keychain entries. Secure-store failures must stop setup rather than fall back to plaintext.
 
 Removing the connector's credentials and stopping its sessions prevents its further local use. It does not invalidate a key that someone has already copied. Recovery from an actual key compromise depends on the workspace's identity/account recovery procedures.
 
@@ -33,3 +33,11 @@ No public security-reporting channel has been configured. Before public release,
 ## Host trust and parser limits
 
 OS storage protects the stored copy; it does not isolate it from a malicious process running as the same local user. JavaScript strings cannot be reliably zeroized; byte arrays are cleared where practical. Parser processes inherit no credentials but are not OS sandboxes. See docs/TOOLS.md.
+
+## Browser provisioning boundary
+
+The setup HTTP listener binds only 127.0.0.1 on a random port, for five minutes or one completed attempt. It accepts writes only with an exact Host, same-origin Origin, JSON content type and a random 256-bit bearer capability. Cross-site Fetch Metadata is rejected; preflight/CORS and arbitrary endpoints are unsupported. The initial URL puts the capability in its fragment, never in the HTTP request path; page script removes the fragment from the current history entry. No secrets are placed in URLs. The local page uses a nonce-based CSP, forbids framing and native form submission, has no external assets, and sets no-store/no-referrer headers. Request headers/body and concurrency are bounded; no credential-value logging or telemetry is added.
+
+The setup capability is visible to the assistant launching setup and potentially to local OS/browser history or diagnostics; it is not an isolation boundary against that assistant, malicious extensions or other processes running as the same user. Those actors may also access user-authorized credentials. Do not treat localhost, hidden inputs, field clearing or JavaScript string clearing as guaranteed secret erasure. Browser password managers, history syncing and extensions have their own data handling. The user should enter secrets only in their own trusted browser, never through an assistant-operated browser session.
+
+The backend verifies identity and live authentication before storage. It checks session validity before and after secure storage and rolls back the credential if setup expires before profile persistence. Once an atomic profile save has begun it may complete even as the session expires; a lost/expired browser response must be reconciled with status/doctor rather than interpreted as proof of no saved profile. Cancellation before submission stores nothing. A failed authenticated attempt closes the session and requires a fresh launch.

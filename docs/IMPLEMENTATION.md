@@ -2,7 +2,9 @@
 
 | Source | Responsibility |
 | --- | --- |
-| cli.ts | Human provisioning, launcher, status/doctor and disconnect |
+| cli.ts | Setup method selection, launcher, status/doctor and disconnect |
+| provision.ts | Shared consent, identity/auth checks, storage transaction and rollback |
+| setup-server.ts / setup-page.ts | Short-lived loopback setup, browser form and request protections |
 | config.ts | Public profiles, exclusive setup lock, atomic updates and disabled state |
 | credentials.ts | Connector-owned OS entries; no plaintext fallback |
 | secret-input.ts | Raw/nsec and bounded encrypted-backup decoding |

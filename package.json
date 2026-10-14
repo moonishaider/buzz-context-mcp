@@ -1,6 +1,6 @@
 {
   "name": "buzz-context-mcp",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "private": true,
   "description": "Independent read-only Buzz context MCP server",
   "type": "module",
@@ -19,7 +19,9 @@
     "CONTRIBUTING.md",
     "CHANGELOG.md",
     "LICENSE",
-    "docs"
+    "docs",
+    "SUPPORTED_VERSION.json",
+    "scripts/prepare-local.mjs"
   ],
   "scripts": {
     "build": "tsc",
@@ -27,7 +29,9 @@
     "test": "npm run build && tsx --test test/*.test.ts",
     "lint": "eslint src test",
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
-    "start": "node dist/cli.js serve"
+    "start": "node dist/cli.js serve",
+    "prepare-local": "node scripts/prepare-local.mjs",
+    "setup": "node dist/cli.js configure"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
