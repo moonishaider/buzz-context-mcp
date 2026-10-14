@@ -17,7 +17,7 @@ Public source alpha **0.1.0-alpha.3**, installed from the merged default branch.
 | Environment | Evidence | Status |
 | --- | --- | --- |
 | macOS ARM64, Node 24.14, Codex | Automated package/keyring, synthetic model/tool and scoped real-data history/transcript acceptance | Usable alpha within documented limits; complete UI-parity and fresh teammate onboarding remain unverified |
-| macOS, Claude Code | Synthetic model/tool acceptance; no real-data human pilot | Experimental |
+| macOS, Claude Code | Current synthetic document/permission checks and three-skill discovery/invocation; no real-data human pilot | Synthetic-tested alpha; real-data acceptance remains unverified |
 | Native Windows, Codex or Claude Code | Package/credential checks in CI; no authenticated human client installation | Experimental |
 | Linux desktop with unlocked Secret Service | Package/secure-store CI; no authenticated human client installation | Experimental |
 | Headless Linux/WSL without Secret Service | Secure storage unavailable | Unsupported; no plaintext fallback |
@@ -38,3 +38,15 @@ Fresh source checkout at **6103b644187c0f5dc2696272b1161a6f8a98beea** completed 
 The distribution file list was reviewed: intended compiled source/docs/metadata only, with tests, fixtures, local profiles, dependencies and installation records excluded. A pattern scan of 118 connector and 17 skills reachable history blobs found no matching common credential values; this is a scoped scan, not proof of absence or an independent audit. Historical organization names in setup examples are not current onboarding requirements.
 
 The public skills checkout at **b8138ccce107d2c1b74429a82f06636619621013** matched all six reviewed skill/metadata files. This proves source integrity, not actual Claude/Windows/Linux skill discovery. General stable rollout remains unverified as described above.
+
+## Installed-client acceptance — October 15, 2026 (local date)
+
+Codex CLI 0.162.0 and Claude Code 2.1.132/Sonnet 4.6 both ran the current reader from isolated project directories with synthetic data and temporary MCP settings. Each read a generic-labelled text transcript across offsets 0 and 20,000: all 22,612 characters, complete extraction, no final continuation. Both observed ACCESS_DENIED for the other identity's private channel. Actual tool-call responses were inspected, not just final model assertions.
+
+Claude startup explicitly advertised all three local skills and invoked buzz-context-document-review through the Skill tool. Codex discovered and read all three project skill files, then used MCP. Claude had no filesystem/shell/web tools or other MCP endpoints; only synthetic data entered its previously authorized test account.
+
+The first Claude response repeated its review and showed a raw channel identifier. A second short-answer check read the entire document but misstated a date and phrased an instruction as completed activity. These are observed answer-quality errors; successful tool retrieval does not establish a flawless summary. A narrow skills 0.1.1 update adds explicit continuation/completeness and concise readable-review guidance. Behavioral follow-up is recorded separately; instructions cannot guarantee model compliance.
+
+All five jobs passed at published connector merge **cc2786d40e1f257accd9243020fa85837f100faf** in [run 38646053377](https://github.com/moonishaider/buzz-context-mcp/actions/runs/38646053377). Native Windows/Linux authenticated client tests and a real-data Claude human pilot were not performed.
+
+Follow-up: the revised skill passed the bundled structural validator. A realistic short-summary retest again retrieved every section and correctly denied the private channel; the source date was correct, but the model still paraphrased an instruction to review as though review had happened and retained technical fields. These answer-quality checks are **partial, not a full pass**. Further prompt repetitions are not treated as proof of reliability. The connector returned the original source correctly; no connector change can guarantee a downstream model's prose. General stable multi-client rollout remains unestablished.
