@@ -1,8 +1,8 @@
 # Release checklist
 
 - [ ] Exact reviewed commit and attribution verified.
-- [ ] Full CI and secure-store behavior pass on supported operating systems.
-- [ ] Actual Buzz relay tests prove cross-user isolation.
+- [x] Full package CI and secure-store behavior passed on macOS/Windows/Linux at code commit 79dca42197b085bd13e22551b9860261bf5f6dbe; recheck the final release candidate.
+- [x] Disposable official Buzz relay tests prove the tested cross-user isolation, native DM discovery and uploaded-image paths at that code commit.
 - [ ] First-human pilot matches representative UI history, DMs and attachments.
 - [ ] Real Codex/Claude workflows verified for every stable environment.
 - [ ] Encryption, edited/deleted history and legacy-thread limits accepted or resolved.

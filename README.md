@@ -17,6 +17,8 @@ Requires Node.js 24.14+ within the Node 24 release line. No package has been pub
 - [Implementation details](docs/IMPLEMENTATION.md)
 - [Testing](docs/TESTING.md)
 - [Verification](docs/VERIFICATION.md)
+- [First-user pilot and rollback](docs/PILOT.md)
+- [Release review packet](docs/RELEASE_REVIEW.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Sources](docs/SOURCES.md)
 - [Coding-assistant instructions](AGENTS.md)
