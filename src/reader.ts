@@ -144,16 +144,18 @@ export class BuzzReader {
       try{url=new URL(meta.url??'');}catch{return {index,downloadable:false,reason:'No valid attachment URL'};}
       const sha=meta.x??url.pathname.match(/^\/media\/([a-f0-9]{64})(?:\.|$)/)?.[1];
       const valid=hex.safeParse(sha).success&&url.origin===this.client.relay&&url.pathname.startsWith(`/media/${sha}`)&&!url.username&&!url.password&&!url.search&&!url.hash;
-      return {index,url:meta.url,mime:meta.m,sha256:sha,downloadable:valid,reason:valid?null:'External or unverified media; reference only'};
+      return {index,url:meta.url,mime:meta.m,filename:meta.filename?.slice(0,255),sha256:sha,downloadable:valid,reason:valid?null:'External or unverified media; reference only'};
     });
   }
-  async attachment(parent:string,channel:string,index:number) {
+  async attachment(parent:string,channel:string,index:number,offset=0,length=20000) {
     const event=await this.get(parent,channel);const reference=this.attachmentReferences(event)[index];
     if(!reference?.downloadable||!('url' in reference)||!reference.url||!reference.sha256) throw new ReaderError('ATTACHMENT_DENIED','No downloadable attachment at that parent index.');
     const media=await this.client.media(reference.url,reference.sha256);
     // Membership may change while downloading: validate parent again before returning bytes/text.
     await this.get(parent,channel);
-    const extraction=await extractAttachment(media.bytes,media.type);
+    const extraction=await extractAttachment(media.bytes,media.type,{filename:reference.filename,declaredType:reference.mime,offset,length});
+    // Parsing can take time too: recheck access before returning every section.
+    await this.get(parent,channel);
     return {parent:source(event,this.client.relay),attachment:reference,bytes:media.bytes.length,...extraction};
   }
 }

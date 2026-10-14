@@ -77,6 +77,32 @@ test('MCP handshake advertises only read tools and rejects unauthorized/tool inj
   assert.doesNotMatch(JSON.stringify(good),/nsec|private diagnostic/);
   const status=await client.callTool({name:'connection_status',arguments:{}});assert.match(JSON.stringify(status),/unsupported_features.*encrypted DMs/);
 });
+
+test('MCP reads generic-labeled transcript sections and rechecks permissions on continuation',async t=>{
+  const f=await fixture();t.after(f.close);const bc=new BuzzClient(f.origin,f.alice,{testLoopback:true});t.after(()=>bc.dispose());
+  const original='BEGIN'+(' synthetic meeting line '.repeat(1500))+'END';const bytes=new TextEncoder().encode(original);const sha=hash(bytes);
+  f.blobs.set(sha,{bytes,type:'application/octet-stream'});
+  const parent=f.sign(9,'Transcript',[['h',A],['imeta',`url ${f.origin}/media/${sha}.bin`,`x ${sha}`,'filename meeting.txt','m application/octet-stream']]);f.events.push(parent);
+  const server=createServer(new BuzzReader(bc));const client=new Client({name:'synthetic-document-test',version:'1.0.0'});
+  const [ct,st]=InMemoryTransport.createLinkedPair();await server.connect(st);await client.connect(ct);t.after(async()=>{await client.close();await server.close();});
+  const args={channel_id:A,parent_event_id:parent.id,attachment_index:0};
+  const first=await client.callTool({name:'read_attachment',arguments:args});assert.ok(!first.isError);
+  const read=(r:typeof first)=>JSON.parse((r.content as {text:string}[])[0]!.text) as {text:string;next_offset:number|null;extraction_complete:boolean;truncated:boolean};
+  const a=read(first);assert.equal(a.next_offset,20000);assert.equal(a.extraction_complete,true);
+  const last=await client.callTool({name:'read_attachment',arguments:{...args,offset:a.next_offset}});assert.ok(!last.isError);
+  const b=read(last);assert.equal(a.text+b.text,original);assert.equal(b.next_offset,null);assert.equal(b.truncated,false);
+  f.allowed.get(f.ap)!.delete(A);
+  const denied=await client.callTool({name:'read_attachment',arguments:{...args,offset:20000}});assert.equal(denied.isError,true);assert.doesNotMatch(JSON.stringify(denied),/synthetic meeting line/);
+});
+
+test('attachment access is checked after parsing before content is returned',async t=>{
+  const f=await fixture();t.after(f.close);const bc=new BuzzClient(f.origin,f.alice,{testLoopback:true});t.after(()=>bc.dispose());const reader=new BuzzReader(bc);
+  const bytes=new TextEncoder().encode('private document');const sha=hash(bytes);f.blobs.set(sha,{bytes,type:'text/plain'});
+  const parent=f.sign(9,'Document',[['h',A],['imeta',`url ${f.origin}/media/${sha}.txt`,`x ${sha}`]]);f.events.push(parent);
+  const get=reader.get.bind(reader);let calls=0;
+  reader.get=async(id,channel)=>{if(++calls===3)f.allowed.get(f.ap)!.delete(A);return get(id,channel);};
+  await assert.rejects(()=>reader.attachment(parent.id,A,0),/accessible channel\/DM/);assert.equal(calls,3);
+});
 test('long event content is retrieved in bounded immutable chunks with fresh access checks',async t=>{
   const f=await fixture();t.after(f.close);const client=new BuzzClient(f.origin,f.alice,{testLoopback:true});t.after(()=>client.dispose());const reader=new BuzzReader(client);
   const event=f.sign(9,'prefix'+('x'.repeat(8000))+'suffix',[['h',A]]);f.events.push(event);

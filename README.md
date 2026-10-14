@@ -31,4 +31,8 @@ The assistant reads this repository and prepares the supported default-branch so
 
 The [companion documentation repository](https://github.com/moonishaider/buzz-context-mcp-docs) contains implementation and operating records. Both repositories stay private during testing.
 
+## Optional research skills
+
+The private [Buzz Context Skills](https://github.com/moonishaider/buzz-context-skills) repository provides three instruction-only workflows for research, catch-ups and document review. Follow its README to review and install them into your client's supported skill location. They are used by the assistant, not fetched automatically by this server, and do not add tools or permissions. They require no additional credentials or MCP registration. Ordinary answers should use readable source names, authors and dates; exact source references remain in tool results for verification.
+
 Apache-2.0 licensed; independent of Buzz, OpenAI and Anthropic. No official endorsement is implied.

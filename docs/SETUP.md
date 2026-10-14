@@ -69,3 +69,7 @@ node dist/cli.js disconnect --profile personal
 The profile is disabled before key deletion. Readers check profiles before/after calls and poll every two seconds. A failed key deletion leaves a disabled profile so cleanup can be retried after unlocking the store. Only connector-owned state is removed. Remove client registration separately and restart clients to end all processes. A key copied elsewhere and existing provider transcripts are not revoked.
 
 status reports public config only; doctor performs discovery and one authenticated query. Neither proves full coverage. --help lists commands. CONFIG_BUSY means another setup owns the lock; after an interrupted setup, confirm none is running before removing only the connector provisioning.lock.
+
+## Updating an existing installation
+
+Preserve the registered executable path, profile, OS credential entry and unrelated client configuration. Check the installation checkout is clean, record its current commit and preparation metadata, then fast-forward to the reviewed default-branch source and run `npm run prepare-local` with the supported Node runtime. Do not rerun credential provisioning for this document-reader update. Existing MCP processes retain their old tool schema/code: reconnect the Buzz Context MCP or restart the client after preparation. Verify a new STDIO connection reports the updated version and attachment section parameters. For rollback, restore the recorded previous source, prepare it and reconnect. Never pull over a dirty checkout.
