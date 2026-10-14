@@ -1,12 +1,12 @@
 # Source installation and connection
 
-Private alpha. Read VERIFICATION.md and SUPPORTED_VERSION.json first. Requires private repository access, Node.js 24.14+ within Node 24, and a working OS credential store. No public package exists. Browser setup is supported by this candidate; the repo-link-only entrypoint is ready to activate when the maintainer merges it to the default branch.
+Public source alpha 0.1.0-alpha.3. Read VERIFICATION.md and SUPPORTED_VERSION.json first. Requires Git, Node.js 24.14+ within Node 24, and a working OS credential store. No npm package exists. The merged default branch supports source installation with browser or Terminal setup. Public repository access needs no GitHub invitation; relay access still requires each user's own identity.
 
 ## Assistant-led preparation
 
 A user can give their assistant just this repo link and ask for setup. The assistant must:
 
-1. Read README.md, AGENTS.md, SECURITY.md, this guide and VERIFICATION.md. Clone the repository default branch into an isolated local installation checkout, or reuse an existing clean installation. Preserve development worktrees. Read SUPPORTED_VERSION.json to select the supported source version; do not make users supply commit hashes. If the default branch is initialization-only, stop and report that the candidate needs maintainer merge; do not guess another branch.
+1. Read README.md, AGENTS.md, SECURITY.md, this guide and VERIFICATION.md. Clone the repository default branch into an isolated local installation checkout, or reuse an existing clean installation. Preserve development worktrees. Read SUPPORTED_VERSION.json to select the supported source version; do not make users supply commit hashes. Record the resolved default-branch commit and use that checkout throughout preparation; do not guess a feature branch.
 2. Prepare Node 24.14+ within Node 24, using an isolated runtime if necessary. From the clean checkout run `npm run prepare-local`. This installs locked dependencies with lifecycle scripts disabled, runs the full checks/build and records version, commit, runtime and platform in ignored `.installation.json`. It does not provision credentials or register clients. The assistant handles these commands.
 3. Offer **browser setup (default)** or **Terminal setup**. Ask for the intended relay and public identity if not known; neither is secret. Never read/export Buzz internal credentials.
 
@@ -58,7 +58,7 @@ claude mcp add --scope user --transport stdio buzz-context -- node /ABSOLUTE/PAT
 
 Use project scope if you prefer project-only registration. Quote Windows paths with spaces according to your shell. Verify /mcp. This direct Node launcher does not need npx.cmd wrapping.
 
-A company client account needs authorization when used to test a personal project. Current Claude authorization covers synthetic content only.
+Use a client/model account authorized to process the intended workspace content. Existing maintainer Claude test evidence covers synthetic content only; it does not authorize anyone else's account or real-data access.
 
 ## Disconnect and troubleshooting
 
@@ -73,3 +73,9 @@ status reports public config only; doctor performs discovery and one authenticat
 ## Updating an existing installation
 
 Preserve the registered executable path, profile, OS credential entry and unrelated client configuration. Check the installation checkout is clean, record its current commit and preparation metadata, then fast-forward to the reviewed default-branch source and run `npm run prepare-local` with the supported Node runtime. Do not rerun credential provisioning for this document-reader update. Existing MCP processes retain their old tool schema/code: reconnect the Buzz Context MCP or restart the client after preparation. Verify a new STDIO connection reports the updated version and attachment section parameters. For rollback, restore the recorded previous source, prepare it and reconnect. Never pull over a dirty checkout.
+
+## Install the companion skills and verify
+
+Read the public [skills README](https://github.com/moonishaider/buzz-context-skills) and install its three reviewed skill folders into this client's supported local skill location. Preserve existing skills and registrations; the skills require no credentials or additional MCP registration. Codex and Claude Code use different user-skill directories. Other clients require their own verified skill support.
+
+After reconnecting the MCP, inspect connection_status, confirm the intended relay/identity, retrieve a user-selected accessible channel message, and read a supported uploaded document if one is available. Follow every document continuation and report any extraction limits. Confirm all three skill names in the actual client; a file copy alone is not discovery evidence. Do not send test messages or change memberships. Report unavailable checks instead of declaring the installation fully verified.

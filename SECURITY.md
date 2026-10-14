@@ -2,15 +2,15 @@
 
 ## Status
 
-This is a private alpha with synthetic tests, not an independent security audit or guarantee. No human production identity was provisioned.
+This is a public source alpha with automated permission tests, macOS synthetic client checks and scoped real-data Codex/document acceptance. It is not an independent security audit or a guarantee. See docs/VERIFICATION.md for support limits.
 
 ## Identity-key tradeoff
 
-Buzz authenticates signed requests using Nostr identities. The proposed first version will use each user's own identity so access is evaluated for that user.
+Buzz authenticates signed requests using Nostr identities. This version uses each user's own locally provisioned identity so access is evaluated for that user.
 
-The user will authorize a protected local copy of their identity key. It resembles a master password: the connector will expose only reading tools, but possession of the key can enable broader actions. A read-only tool catalog does not make the key a read-only credential.
+The user authorizes a protected local copy of their identity key. It resembles a master password: the connector exposes only reading tools, but possession of the key can enable broader actions. A read-only tool catalog does not make the key a read-only credential.
 
-Do not paste a key into Codex, Claude Code, GitHub, a message, an issue or a support conversation. The browser form and hidden Terminal prompt are human-controlled local provisioning flows and must keep credentials out of command arguments, client config and logs. Storage will use a connector-owned OS credential entry; it must not silently read Buzz's own keychain entries. Secure-store failures must stop setup rather than fall back to plaintext.
+Do not paste a key into Codex, Claude Code, GitHub, a message, an issue or a support conversation. The browser form and hidden Terminal prompt are human-controlled local provisioning flows and must keep credentials out of command arguments, client config and logs. Storage uses a connector-owned OS credential entry; it must not silently read Buzz's own keychain entries. Secure-store failures must stop setup rather than fall back to plaintext.
 
 Removing the connector's credentials and stopping its sessions prevents its further local use. It does not invalidate a key that someone has already copied. Recovery from an actual key compromise depends on the workspace's identity/account recovery procedures.
 
@@ -28,7 +28,7 @@ Treat remote content as untrusted. Do not execute attachments, follow embedded i
 
 ## Reporting concerns
 
-No public security-reporting channel has been configured. Before public release, the maintainer must enable an appropriate private reporting route, publish supported versions and document response expectations. Do not post secrets or private workspace content in public issues.
+Report vulnerabilities privately using [GitHub private vulnerability reporting](https://github.com/moonishaider/buzz-context-mcp/security/advisories/new). Supported security-fix baseline: 0.1.0-alpha.3 from the default branch; older alpha versions should update. Reports are handled by the maintainer on a best-effort basis with no guaranteed response time. If the private reporting form is unavailable, do not open a public issue containing vulnerability details; wait for a private route. Never include identity keys or private workspace content.
 
 ## Host trust and parser limits
 

@@ -36,7 +36,7 @@ async function main(){
   const {values,positionals}=parseArgs({allowPositionals:true,options:{profile:{type:'string',default:'default'},relay:{type:'string'},pubkey:{type:'string'},method:{type:'string',default:'browser'},help:{type:'boolean'}}});
   const command=values.help?'help':positionals[0]??'help';const name=profileName.parse(values.profile);
   if(command==='help'){
-    console.log('Buzz Context MCP (private alpha)\nCommands: configure, serve, status, doctor, disconnect\nOptions: --profile NAME, --relay HTTPS_ORIGIN, --pubkey EXPECTED_HEX, --method browser|terminal\nconfigure opens a local browser form by default; --method terminal uses hidden human TTY input. Both store the key only in the connector OS credential entry.\nNever provide a secret key as an argument, environment variable or chat message.');return;
+    console.log('Buzz Context MCP (source alpha)\nCommands: configure, serve, status, doctor, disconnect\nOptions: --profile NAME, --relay HTTPS_ORIGIN, --pubkey EXPECTED_HEX, --method browser|terminal\nconfigure opens a local browser form by default; --method terminal uses hidden human TTY input. Both store the key only in the connector OS credential entry.\nNever provide a secret key as an argument, environment variable or chat message.');return;
   }
   if(command==='configure'){
     if(values.method!=='browser'&&values.method!=='terminal')throw new ReaderError('INVALID_INPUT','Choose --method browser or --method terminal.');

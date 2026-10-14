@@ -1,41 +1,17 @@
-# Release review packet
+# Release review
 
-The private alpha's main integration defect is fixed. Public distribution remains blocked by human/client acceptance; this is a concrete preparation record, not a publication request or a production-readiness claim.
+## Distribution decision
 
-## Reviewed behavior and evidence
+The maintainer authorized correcting all three repositories and making **buzz-context-mcp** and **buzz-context-skills** public on October 15, 2026 (local date). **buzz-context-mcp-docs remains private.** Distribution is reviewed default-branch source, version **0.1.0-alpha.3**, under the existing Apache-2.0 license. No npm publication is needed; `private: true` prevents accidental registry publication and does not make GitHub source private.
 
-Code baseline: **79dca42197b085bd13e22551b9860261bf5f6dbe**. Native DM discovery uses the pinned Buzz relay's group metadata and rechecks membership. Diagnostics disclose unsupported encrypted-DM and current-UI/legacy-thread paths. The first release remains strictly read-only.
+## Product and acceptance
 
-- Full local package check: 20 tests passed, including native OS credential storage/removal.
-- [Complete CI run](https://github.com/moonishaider/buzz-context-mcp/actions/runs/38564390325): all five jobs passed, including the stronger official-relay DM/image/private-access/revocation suite and macOS/Windows/Linux package jobs.
-- macOS real-client model/tool checks: Codex 0.162.0 and Claude Code 2.1.132 passed permitted/denied reads, attachment extraction and native DM discovery against a synthetic fixture. No production identities/content were used.
-- Dependency audit: zero advisories at the audit time.
-- Private tarball was installed into a fresh disposable folder with lifecycle scripts disabled; the packaged CLI help succeeded under Node 24.14. Package files excluded tests, CI and scratch content. Repack and inspect the exact final documentation candidate before publication.
+The merged connector provides 13 read-only tools, local browser/Terminal provisioning, OS credential storage, readable-source guidance and complete supported document text through bounded continuation. See VERIFICATION.md for exact code/CI references. Public documentation and optional skills contain all setup information; users do not need the private companion repository.
 
-## Outstanding acceptance
+Scoped macOS/Codex real-data acceptance and cross-platform automated checks exist. General stable rollout for all clients/OS combinations is not established. Native Windows/Linux authenticated client onboarding, real-data Claude acceptance and comprehensive UI parity remain unverified. The public release is therefore an alpha, with experimental combinations identified explicitly rather than advertised as fully accepted.
 
-1. Human credential provisioning and a successful read-only Buzz/UI pilot; use PILOT.md.
-2. Authenticated Codex and Claude real-client workflows on native Windows and Linux, including installation, storage and disconnect. No such machines/client logins were made available in this run. Package CI does not fill these four model/client cells.
-3. Maintainer acceptance of the documented unsupported encryption/edit/delete/legacy-thread behavior, or a separately scoped implementation to close those gaps. Do not silently advertise full UI parity or all encrypted DMs.
-4. Final exact commit/artifact review, supported-environment declaration and private vulnerability reporting setup.
+## Publication checks
 
-The original all-six-client/OS acceptance target is still incomplete. A narrower experimental release would be an explicit product-scope decision, not a substitute for those tests.
+Review outgoing attribution without overriding runtime identity, tracked files and reachable history for credentials/private content, dependency audit, full package checks and clean-source preparation. Verify anonymous retrieval and clean preparation again after visibility changes. Enable and verify private GitHub vulnerability reporting. Keep the internal documentation repository private.
 
-## Proposed distribution for final approval
-
-- Implementation and documentation repositories under the maintainer's personal GitHub account.
-- Existing Apache-2.0 license; final approval includes that license.
-- Proposed version/tag: **0.1.0-alpha.1 / v0.1.0-alpha.1**, labelled alpha with precise support limits.
-- Proposed npm name: **buzz-context-mcp**. An October 14 registry lookup returned 404; this does not reserve the name or prove publishing rights. Verify availability, publisher authentication and package ownership before selecting npm as an approved destination. GitHub release/source distribution is an alternative requiring its own exact approval.
-- Keep `private: true` until explicit publication authorization. No merge, tag, visibility change, npm login or publication has occurred.
-- Enable and verify a private GitHub vulnerability-reporting route as part of the approved public-release setup; do not invent a contact address or claim that route is already available.
-
-Final approval must identify the exact two PR heads, release artifact/version, public repository targets, distribution destination and compatibility claims. After approval, verify fresh installation from the actual published artifact before providing installation links for teammates.
-
-## Announcement preparation
-
-A team announcement may describe the independent read-only alpha, per-user local credential provisioning, supported environments and limitations. It must link to verified public installation instructions and the actual released artifact. Keep the announcement as a draft until publication and post-publication installation succeed. The owner sends it; no team outreach is authorized here.
-
-## Browser onboarding candidate
-
-0.1.0-alpha.2 adds optional hidden Terminal setup alongside a default local browser form, shared storage/authentication checks, partial-write cleanup and supported source-version metadata/preparation. It is intended to remove human-supplied commit hashes after default-branch merge. Review the browser request boundaries in SECURITY.md and evidence limits in VERIFICATION.md. Existing private PR #1 contains the complete read-only reader plus this onboarding update; merging it affects the entire candidate, not only the form. Merge approval and public publication are separate; no public release is requested by this implementation alone. Human production/UI acceptance and native Windows/Linux client workflows remain outstanding.
+The owner sends any team announcement. Supply a general-rollout announcement only when its compatibility claim is supported; do not infer readiness from public visibility. See RELEASE_CHECKLIST.md and PILOT.md.

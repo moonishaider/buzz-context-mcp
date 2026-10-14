@@ -13,3 +13,7 @@ Add default browser provisioning alongside optional hidden Terminal setup. Both 
 Local read-only MCP and 13 tools; human-only secure-store provisioning; signed/scoped requests; parent-verified hashed attachments; bounded parser processes; synthetic permission tests and temporary-config client probes.
 
 Public publication and live human acceptance remain pending.
+
+## Source distribution documentation — October 15, 2026 (local date)
+
+Authorize public-source alpha visibility for connector and skills while keeping internal documentation private. Replace superseded pre-merge setup/status instructions, document the combined connector-and-skills entrypoint and distinguish scoped macOS acceptance from experimental platforms. Runtime/package version remains 0.1.0-alpha.3; no npm publication. Earlier private-candidate entries above describe historical states, not current installation blockers.
