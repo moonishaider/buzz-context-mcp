@@ -15,3 +15,9 @@ Scoped macOS/Codex real-data acceptance and cross-platform automated checks exis
 Review outgoing attribution without overriding runtime identity, tracked files and reachable history for credentials/private content, dependency audit, full package checks and clean-source preparation. Verify anonymous retrieval and clean preparation again after visibility changes. Enable and verify private GitHub vulnerability reporting. Keep the internal documentation repository private.
 
 The owner sends any team announcement. Supply a general-rollout announcement only when its compatibility claim is supported; do not infer readiness from public visibility. See RELEASE_CHECKLIST.md and PILOT.md.
+
+## Teammate alpha rollout decision — October 15, 2026 (local date)
+
+The maintainer explicitly approved a teammate-first alpha rollout with public source availability and Windows/Linux feedback collected after release. These unverified combinations are not installation blockers for the alpha; they remain experimental and each installer must run the documented local checks. This supersedes the earlier requirement to withhold an announcement until every platform/client had full human acceptance. It does not change any recorded test result or claim stable universal support.
+
+Release scope: existing read-only connector 0.1.0-alpha.3 plus instruction-only skills 0.1.1, local Codex or Claude Code, each person's own locally provisioned identity. No npm publication, automatic remote updates, account changes, teammate outreach or connector runtime changes are part of this release. The owner sends the announcement.
