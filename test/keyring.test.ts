@@ -11,7 +11,9 @@ test('OS credential store round trip with disposable identity, then removal',{sk
 });
 
 
-test('secure-store verification failure attempts cleanup without exposing key values',async t=>{
+// Entry construction itself needs the OS store, even when its methods are mocked.
+// The dedicated Linux Secret Service job enables this test along with native round trips.
+test('secure-store verification failure attempts cleanup without exposing key values',{skip:process.env.BUZZ_CONTEXT_TEST_KEYRING!=='1'},async t=>{
   const {AsyncEntry}=await import('@napi-rs/keyring');let removed=0;
   t.mock.method(AsyncEntry.prototype,'setSecret',async()=>{});
   t.mock.method(AsyncEntry.prototype,'getSecret',async()=>{throw new Error('synthetic-private-value');});
