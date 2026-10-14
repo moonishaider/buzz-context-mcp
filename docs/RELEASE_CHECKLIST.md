@@ -11,7 +11,7 @@
 - [x] Final clean preparation and anonymous public-source retrieval verified.
 - [x] Private vulnerability reporting verified on both public repositories.
 
-## General stable rollout — incomplete
+## Future stable acceptance — not a blocker for the approved teammate alpha
 
 - [ ] Fresh human teammate setup and full intended workflow verified on each advertised stable environment.
 - [ ] Native Windows/Linux authenticated Codex/Claude workflows accepted.
@@ -20,3 +20,5 @@
 - [ ] Broader UI-parity checks completed; unsupported features remain explicit.
 
 Keep `private: true` for source-only distribution. npm publication would require its own review and authorization. CI and model summaries do not replace authenticated human workflow evidence.
+
+The maintainer approved teammate alpha rollout with local installation verification and post-release Windows/Linux feedback. No unchecked stable-acceptance item is represented as passed.

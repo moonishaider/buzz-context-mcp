@@ -19,3 +19,9 @@ Development rules:
 - Public visibility and package release require separate authorization.
 
 For installation requests, read SUPPORTED_VERSION.json, docs/SETUP.md and docs/VERIFICATION.md first. Offer browser (default) or Terminal setup; do not require a human-supplied commit hash. The merged default branch is the source-installation entrypoint. Preserve existing client registrations and worktrees. The version manifest is compatibility metadata, not proof that untested platforms have passed. This is a public alpha, not a stable release. Do not claim live Buzz or untested platform/client coverage.
+
+## Teammate alpha rollout decision — October 15, 2026 (local date)
+
+The maintainer explicitly approved a teammate-first alpha rollout with public source availability and Windows/Linux feedback collected after release. These unverified combinations are not installation blockers for the alpha; they remain experimental and each installer must run the documented local checks. This supersedes the earlier requirement to withhold an announcement until every platform/client had full human acceptance. It does not change any recorded test result or claim stable universal support.
+
+Release scope: existing read-only connector 0.1.0-alpha.3 plus instruction-only skills 0.1.1, local Codex or Claude Code, each person's own locally provisioned identity. No npm publication, automatic remote updates, account changes, teammate outreach or connector runtime changes are part of this release. The owner sends the announcement.

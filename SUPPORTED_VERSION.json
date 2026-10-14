@@ -8,5 +8,8 @@
     "terminal"
   ],
   "fullHumanPilotPlatforms": [],
-  "verification": "docs/VERIFICATION.md"
+  "verification": "docs/VERIFICATION.md",
+  "rollout": "teammate-alpha",
+  "skillsVersion": "0.1.1",
+  "releaseTag": "v0.1.0-alpha.3"
 }

@@ -50,3 +50,13 @@ The first Claude response repeated its review and showed a raw channel identifie
 All five jobs passed at published connector merge **cc2786d40e1f257accd9243020fa85837f100faf** in [run 38646053377](https://github.com/moonishaider/buzz-context-mcp/actions/runs/38646053377). Native Windows/Linux authenticated client tests and a real-data Claude human pilot were not performed.
 
 Follow-up: the revised skill passed the bundled structural validator. A realistic short-summary retest again retrieved every section and correctly denied the private channel; the source date was correct, but the model still paraphrased an instruction to review as though review had happened and retained technical fields. These answer-quality checks are **partial, not a full pass**. Further prompt repetitions are not treated as proof of reliability. The connector returned the original source correctly; no connector change can guarantee a downstream model's prose. General stable multi-client rollout remains unestablished.
+
+## Teammate alpha rollout decision — October 15, 2026 (local date)
+
+The maintainer explicitly approved a teammate-first alpha rollout with public source availability and Windows/Linux feedback collected after release. These unverified combinations are not installation blockers for the alpha; they remain experimental and each installer must run the documented local checks. This supersedes the earlier requirement to withhold an announcement until every platform/client had full human acceptance. It does not change any recorded test result or claim stable universal support.
+
+Release scope: existing read-only connector 0.1.0-alpha.3 plus instruction-only skills 0.1.1, local Codex or Claude Code, each person's own locally provisioned identity. No npm publication, automatic remote updates, account changes, teammate outreach or connector runtime changes are part of this release. The owner sends the announcement.
+
+## Requested Opus comparison
+
+The earlier Claude checks used Sonnet 4.6. The maintainer then requested Opus; the installed client resolved the alias to **claude-opus-4-7**. The first bounded synthetic test read only the first section and honestly reported 2,612 characters unread. A single follow-up with explicit continuation instructions read both sections, confirmed all 22,612 characters and final continuation null, retained the pending review/no approved release distinction, and observed private-channel denial. Actual tool calls were inspected. This is a synthetic model/client check, not a real-data Claude human pilot or a guarantee of wording accuracy. Larger-model selection alone did not guarantee completion.
