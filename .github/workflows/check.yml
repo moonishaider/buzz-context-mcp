@@ -1,4 +1,4 @@
-name: Private alpha checks
+name: Source alpha checks
 on:
   push:
   pull_request:

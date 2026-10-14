@@ -1,14 +1,21 @@
 # Release checklist
 
-- [ ] Exact reviewed commit and attribution verified.
-- [x] Full package CI and secure-store behavior passed on macOS/Windows/Linux at code commit 79dca42197b085bd13e22551b9860261bf5f6dbe; recheck the final release candidate.
-- [x] Disposable official Buzz relay tests prove the tested cross-user isolation, native DM discovery and uploaded-image paths at that code commit.
-- [ ] First-human pilot matches representative UI history, DMs and attachments.
-- [ ] Real Codex/Claude workflows verified for every stable environment.
-- [ ] Encryption, edited/deleted history and legacy-thread limits accepted or resolved.
-- [ ] Dependencies/artifacts checked; no keys or private content included.
-- [ ] Private vulnerability-reporting route and supported versions documented.
-- [ ] Human explicitly authorizes repository visibility and package publication.
-- [ ] Only then remove private=true and publish the reviewed release.
+## Public source alpha
 
-Synthetic passes, HTTP 200 and a model summary do not replace named live evidence.
+- [x] Maintainer authorized connector and skills public visibility; internal documentation stays private.
+- [x] Implementation, readable-answer guidance and uploaded-document correction merged.
+- [x] 35-test document-reader checks and all five merged-baseline CI jobs passed; exact references in VERIFICATION.md.
+- [x] Scoped macOS real history/transcript acceptance recorded without private content.
+- [x] Source setup, skills installation and support limits documented without pre-merge blockers.
+- [ ] Final outgoing attribution, reachable history, dependencies and artifact review recorded.
+- [ ] Final clean preparation and anonymous public-source retrieval verified.
+- [ ] Private vulnerability reporting verified on both public repositories.
+
+## General stable rollout — incomplete
+
+- [ ] Fresh human teammate setup and full intended workflow verified on each advertised stable environment.
+- [ ] Native Windows/Linux authenticated Codex/Claude workflows accepted.
+- [ ] Real-data Claude workflow and skill discovery accepted.
+- [ ] Broader UI-parity checks completed; unsupported features remain explicit.
+
+Keep `private: true` for source-only distribution. npm publication would require its own review and authorization. CI and model summaries do not replace authenticated human workflow evidence.

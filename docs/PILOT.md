@@ -1,10 +1,10 @@
 # First-user pilot and rollback
 
-This is a private-alpha acceptance procedure, not public installation approval. Start only after the exact candidate commit's complete package and disposable-relay checks pass. The implementation remains on a feature branch until final review.
+This is the human acceptance procedure for the public source alpha. Public availability does not establish a general stable rollout. Start with a reviewed commit whose complete package and disposable-relay checks pass.
 
 ## Prepare the candidate
 
-Use a separate clean installation checkout of the private implementation repository. After approved default-branch merge, the assistant follows SUPPORTED_VERSION.json and runs `npm run prepare-local`, which records the exact commit automatically; users do not need to supply a hash. Before that merge, the maintainer selects the reviewed candidate checkout and records its commit for acceptance. Do not use initialization-only main. Use a permanent Node 24.14+ executable within the Node 24 line, not a disposable test runtime.
+Use a separate clean installation checkout of the public implementation repository's merged default branch. The assistant follows SUPPORTED_VERSION.json and runs `npm run prepare-local`, which records the exact commit automatically; users do not need to supply a hash. Use a permanent Node 24.14+ executable within the Node 24 line, not a disposable test runtime.
 
 ```sh
 node --version
@@ -22,7 +22,7 @@ Run the doctor command for the pilot profile. It verifies an authenticated reque
 
 ## Client registration
 
-Choose Codex for a pilot containing Never Absolute data. The owner's authorization for the company Claude account covers synthetic tests only; do not supply real Never Absolute content to it. A personal Claude login with separate explicit pilot authorization is needed before any such Claude pilot.
+Use a client/model account authorized by the participating human to process the intended workspace content. Historical maintainer Claude evidence is synthetic only. It does not establish real-data acceptance or authorize use of another company account.
 
 Use the exact client registration command in SETUP.md only after reviewing its scope. Add a distinct registration name/profile so existing integrations are preserved. Record the registration and permanent Node path for rollback. No global client config changes are part of automated synthetic testing.
 
@@ -49,4 +49,4 @@ Close test sessions and run `node dist/cli.js disconnect --profile PILOT_PROFILE
 
 ## Release gate
 
-A successful pilot is one part of acceptance. Complete the support matrix, artifact review and RELEASE_CHECKLIST.md. Public repository visibility and package publication require approval of the exact candidate and distribution targets.
+A successful pilot is one part of acceptance. Complete the support matrix, artifact review and RELEASE_CHECKLIST.md. Connector and skills public-source visibility is authorized; the internal documentation stays private. npm publication and new distribution targets require their own authorization. Keep unverified environments experimental.

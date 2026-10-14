@@ -2,30 +2,16 @@
 
 ## Current state
 
-Implementation is authorized and a private alpha exists. Public release and the first human pilot remain gated on verification.
+The read-only implementation, browser/Terminal setup, skills guidance and document correction are merged. The maintainer authorized public-source alpha distribution of the connector and skills on October 15, 2026 (local date); the internal documentation repository stays private. Version 0.1.0-alpha.3 is installed from source. No npm package is published.
 
-## Agreed product direction
+## Next acceptance work
 
-Read-only retrieval; user-specific permissions; configurable compatible Buzz workspaces; macOS/Windows/Linux targets; Codex and Claude Code; on-demand search/history rather than a permanent archive; human- and assistant-readable setup.
+Fresh teammate installation, actual skill discovery and authenticated message/document reads on the intended clients and platforms. macOS/Codex has scoped real-data acceptance; macOS/Claude and native Windows/Linux client workflows remain experimental as described in VERIFICATION.md. General stable rollout awaits evidence rather than a date or percentage estimate.
 
-## Proposed delivery sequence
+## Product boundaries
 
-1. Documentation-only private repository under the maintainer's chosen organization.
-2. After implementation approval, secure local provisioning, restricted signed read adapter and safe diagnostics.
-3. Discovery, search and conversation retrieval, followed by knowledge/projects and bounded attachments.
-4. Complete synthetic permission tests and OS/client workflow checks.
-5. First real-user pilot under explicit local authorization.
-6. Review release artifacts, private-data/credential exclusions and compatibility claims.
-7. Separately authorized public repository/package release.
+Read-only retrieval, per-user permissions, local human-controlled provisioning, on-demand history/search and bounded attachments. No background complete archive or automatic cloud-account access. Keep unsupported encryption, edits/deletions, legacy threads and extraction limits explicit.
 
-The proposed name is `buzz-context-mcp`; availability must be checked in the selected organization. Apache-2.0 is the proposed license and needs final selection before publication. No trademark endorsement is implied.
+Future options include signer-based/scoped authorization, enterprise adapters, hosted connections, optional local indexing and separately authorized write features. These are not current functionality.
 
-## Future options
-
-Signer-based authorization without a connector-held identity key; independently revocable scoped access where supported; enterprise adapters; hosted URL-based connection; optional local archival search; separately scoped write features.
-
-## Approval boundaries
-
-Repository documentation preparation does not authorize connector implementation. Implementation approval does not authorize real-key extraction, public release or publishing private workspace content. Human-controlled credential provisioning and public release remain distinct steps.
-
-Current implementation limits and evidence are authoritative in TOOLS.md and VERIFICATION.md. Earlier planned targets are not verified compatibility claims.
+Apache-2.0 licensed, independent of Buzz/OpenAI/Anthropic. Public source permission does not authorize extracting credentials, publishing workspace content, contacting teammates or publishing an npm package.

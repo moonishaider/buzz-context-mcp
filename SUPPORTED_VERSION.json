@@ -1,11 +1,12 @@
 {
   "version": "0.1.0-alpha.3",
-  "channel": "private-alpha",
+  "channel": "public-alpha",
   "source": "repository-default-branch",
   "packagePublished": false,
   "setupMethods": [
     "browser",
     "terminal"
   ],
-  "fullHumanPilotPlatforms": []
+  "fullHumanPilotPlatforms": [],
+  "verification": "docs/VERIFICATION.md"
 }

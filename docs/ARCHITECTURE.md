@@ -12,7 +12,7 @@ flowchart LR
     E -->|Authorized results| C
 ```
 
-TypeScript, a pinned supported Node.js LTS baseline, the official MCP SDK, maintained Nostr signing code and validated OS credential-store adapters are proposed. A direct typed HTTP adapter avoids requiring the whole Buzz CLI installation. Dependency choice and supported versions must be verified during implementation.
+The implementation uses TypeScript, Node 24.14+ within Node 24, the MCP SDK, nostr-tools and OS credential-store adapters. A direct typed HTTP adapter avoids requiring the Buzz CLI. Exact dependencies are locked in package-lock.json; actual platform acceptance is recorded in VERIFICATION.md.
 
 ## Authentication flow
 
