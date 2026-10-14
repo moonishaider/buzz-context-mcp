@@ -17,7 +17,7 @@ TypeScript, a pinned supported Node.js LTS baseline, the official MCP SDK, maint
 ## Authentication flow
 
 1. A human selects the relay and expected public identity.
-2. A human locally provisions the matching identity through hidden input or a supported encrypted-backup flow.
+2. A human locally provisions the matching identity through a local browser form or hidden Terminal input, accepting a supported encrypted backup in either method.
 3. The connector verifies the derived public key and stores credentials under its own secure-store namespace.
 4. Approved read requests are signed using NIP-98, bound to URL, method and request body. Relay media uses its supported signed-media mechanism.
 5. The relay evaluates authentication and access, and the connector returns only verified readable content.

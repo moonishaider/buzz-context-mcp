@@ -4,7 +4,7 @@ This is a private-alpha acceptance procedure, not public installation approval. 
 
 ## Prepare the candidate
 
-Use a separate checkout of the private implementation repository. Fetch and check out the exact reviewed implementation commit recorded in VERIFICATION.md; do not install from the initialization-only main branch. Confirm `git rev-parse HEAD` matches the candidate before building. Use a permanent Node 24.14+ executable within the Node 24 line, not a disposable test runtime.
+Use a separate clean installation checkout of the private implementation repository. After approved default-branch merge, the assistant follows SUPPORTED_VERSION.json and runs `npm run prepare-local`, which records the exact commit automatically; users do not need to supply a hash. Before that merge, the maintainer selects the reviewed candidate checkout and records its commit for acceptance. Do not use initialization-only main. Use a permanent Node 24.14+ executable within the Node 24 line, not a disposable test runtime.
 
 ```sh
 node --version
@@ -16,7 +16,7 @@ Read SECURITY.md and TOOLS.md before provisioning. Current native Buzz channel D
 
 ## Human-controlled credentials
 
-Follow SETUP.md's configure command in your own terminal. Review the selected relay and your public identity. Enter the key only at the hidden prompt; never paste it in chat or an assistant-visible terminal. The connector must create its own OS entry and must not read Buzz's internal credential storage.
+Choose browser setup (default) or hidden Terminal setup in SETUP.md. For browser setup the assistant launches the local form, and the human uses their own browser to check the relay/public identity, enter credentials and approve storage. For Terminal setup the human enters them at the hidden prompt in their own terminal. Never paste secrets in chat or use an assistant-controlled browser/terminal for real secret entry. The connector creates its own OS entry and does not read Buzz's internal credential storage.
 
 Run the doctor command for the pilot profile. It verifies an authenticated request, not complete product coverage. Retain the result locally without publishing identity or workspace details.
 
