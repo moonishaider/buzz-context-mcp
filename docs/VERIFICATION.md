@@ -28,3 +28,13 @@ Public source alpha **0.1.0-alpha.3**, installed from the merged default branch.
 A general stable rollout across every advertised platform/client is **not established**. Obtain fresh human installation, credential provisioning, skill discovery, permitted message/document reads and disconnect evidence on the intended environments before upgrading their status. Do not replace these checks with CI or a model's assertion. No teammate outreach is part of this release work.
 
 Standard encrypted Nostr DMs, current-UI edits/deletions, legacy unmarked thread reconstruction, OCR, old DOC, transcription, external accounts and file-body indexing remain unsupported. Read TOOLS.md for extraction and pagination bounds. Existing MCP sessions must reconnect after source updates.
+
+## Publication verification — October 15, 2026 (local date)
+
+Connector and skills visibility were verified PUBLIC; the internal companion was verified PRIVATE. Both public READMEs were fetched anonymously, and private vulnerability reporting returned enabled=true for both public repositories.
+
+Fresh source checkout at **6103b644187c0f5dc2696272b1161a6f8a98beea** completed `npm run prepare-local` on macOS ARM64/Node 24.14 with native disposable keyring checks: all **35 tests passed**, zero skipped, full types/lint/build, and dependency audit reported zero vulnerabilities. No existing human profile, key or client registration was changed. The tested candidate **e841398c8c242580cda4e77c38ba7617a5259bd0** also passed all five jobs in [CI run 38645587191](https://github.com/moonishaider/buzz-context-mcp/actions/runs/38645587191). This documentation-only evidence update does not change runtime behavior.
+
+The distribution file list was reviewed: intended compiled source/docs/metadata only, with tests, fixtures, local profiles, dependencies and installation records excluded. A pattern scan of 118 connector and 17 skills reachable history blobs found no matching common credential values; this is a scoped scan, not proof of absence or an independent audit. Historical organization names in setup examples are not current onboarding requirements.
+
+The public skills checkout at **b8138ccce107d2c1b74429a82f06636619621013** matched all six reviewed skill/metadata files. This proves source integrity, not actual Claude/Windows/Linux skill discovery. General stable rollout remains unverified as described above.
