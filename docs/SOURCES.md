@@ -13,4 +13,6 @@ Sources used for the initial design. Upstream behavior can change; verify suppor
 - [Claude Code MCP documentation](https://code.claude.com/docs/en/mcp): MCP connections and configuration.
 - [Official MCP SDK transport documentation](https://ts.sdk.modelcontextprotocol.io/v2/clients/connect): local STDIO and HTTP transports.
 
+The disposable official Buzz 0.2.1 image is pinned to source revision 6e5c462ac524de60d7edb46c66130fd779cc9006. Its [DM command handler](https://github.com/block/buzz/blob/6e5c462ac524de60d7edb46c66130fd779cc9006/crates/buzz-relay/src/handlers/command_executor.rs) emits group discovery events. Its [discovery builder](https://github.com/block/buzz/blob/6e5c462ac524de60d7edb46c66130fd779cc9006/crates/buzz-relay/src/handlers/side_effects.rs) publishes DM kind:39000 metadata with d=channel, t=dm and participant p tags, plus kind:39002 membership snapshots. This is the basis for native DM discovery; kind:41001 is not its DM directory.
+
 No source establishes that this proposed connector is implemented, audited or compatible with every deployed Buzz workspace.

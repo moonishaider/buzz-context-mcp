@@ -8,7 +8,9 @@ Pages contain 1–30 events, default 10. History cursors are bound to operation,
 
 Event previews clip text to 4,000 characters and tags to bounded excerpts. read_event_text supports up to 10,000 UTF-16 code units per chunk with next_offset. Source references use Nostr nevent URIs plus exact IDs and relay. Original event snapshots are not reconciled into the latest edited/deleted UI view.
 
-Threads are bounded explicit-root subsets of channel scans. Legacy unmarked replies may require surrounding history. Empty channel-bound document results do not establish that no unbound documents exist. Encrypted standard DM event handling is not implemented.
+Native Buzz DM discovery reads kind:39000 group metadata with t=dm and p=current identity, then rechecks kind:39002 membership. Kind:41001 is a legacy notification kind, not the pinned relay's DM directory. Empty DM discovery does not establish that encrypted Nostr DMs do not exist. Standard NIP-04/NIP-17 encrypted DM handling is unsupported. Connection diagnostics and DM results disclose that limitation.
+
+Threads are bounded explicit-root subsets of channel scans. Legacy unmarked replies may require surrounding history. Empty channel-bound document results do not establish that no unbound documents exist. Current UI edit/deletion reconciliation and legacy thread reconstruction are unsupported features disclosed in connection diagnostics; original signed-event retrieval is not a current-UI rendering.
 
 Downloads: 10 MiB maximum; inline signature-checked PNG/JPEG/GIF/WebP: 2 MiB maximum; SVG refused. Extracted text: 20,000 characters; PDF: at most 20 pages, no OCR. Office ZIP extraction: selected inflated XML at most 2 MiB/file and 8 MiB total; 500 entries; DTD/entities refused. XLSX: raw stored values, no formula evaluation or formatting, at most 5 sheets/100 rows/30 cells. CSV: bounded raw tabular text.
 

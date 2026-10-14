@@ -37,10 +37,12 @@ export function createServer(reader:BuzzReader,validateSession:()=>Promise<void>
     return {relay:reader.client.relay,identity:reader.client.pubkey,read_only:true,version:'0.1.0-alpha.1',
       relay_version:typeof meta.version==='string'?meta.version.slice(0,100):null,
       supported_nips:Array.isArray(meta.supported_nips)?meta.supported_nips.filter(v=>typeof v==='number').slice(0,100):[],
+      dm_coverage:'Native Buzz channel DMs via NIP-29 metadata; standard encrypted Nostr DMs are unsupported.',
+      unsupported_features:['NIP-04/NIP-17 encrypted DMs','Current UI reconciliation of edits/deletions','Legacy unmarked thread reconstruction'],
       notice:'Discovery is not proof of complete compatibility. Ordinary identity keys have broader authority than these tools.'};
   });
   tool('list_channels','List relay-visible channel metadata with bounded pagination.',page,input=>reader.channels(input));
-  tool('list_dms','List DMs addressed to the selected identity. Encrypted event coverage is not implied.',page,input=>reader.dms(input));
+  tool('list_dms','List native Buzz DM channel metadata tagged dm and addressed to this identity; recheck current membership. Standard encrypted Nostr DMs are unsupported; empty results do not establish their absence.',page,input=>reader.dms(input));
   tool('read_channel_history','Read a bounded channel/DM history page. Continue next_cursor; includes original/edit events without UI reconciliation.',{channel_id:channelId,since:time,until:time,...page},input=>reader.history(input.channel_id,input));
   tool('get_message','Read one event from a confirmed accessible channel/DM.',{channel_id:channelId,event_id:hex},async input=>source(await reader.get(input.event_id,input.channel_id),reader.client.relay));
   tool('read_event_text','Read a bounded immutable text chunk. Channel ID is required except for relay-visible long-form notes. Continue next_offset to read long documents.',{event_id:hex,channel_id:channelId.optional(),offset:z.number().int().min(0).max(524288).default(0),length:z.number().int().min(1).max(10000).default(4000)},input=>reader.text(input.event_id,input.channel_id,input.offset,input.length));

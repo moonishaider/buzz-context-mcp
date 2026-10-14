@@ -24,8 +24,6 @@ export class BuzzReader {
     if(channels.some(e=>e.tags.some(t=>t.length===1&&t[0]==='public'))) return;
     const membership = await this.client.query({kinds:[39002],'#d':[id],'#p':[this.client.pubkey],limit:1});
     if(membership.length) return;
-    const dms = await this.client.query({kinds:[41001],'#d':[id],'#p':[this.client.pubkey],limit:1});
-    if(dms.length) return;
     throw new ReaderError('ACCESS_DENIED','No current accessible channel/DM membership was established.');
   }
   async page(filter: Filter, options: PageOptions = {}) {
@@ -39,7 +37,15 @@ export class BuzzReader {
     }
     const raw = await this.client.query({...filter,limit:500,...(cursor?{until:cursor.until}:{})});
     const checked=new Set<string>();
-    for(const event of raw){const parent=eventChannel(event);if(parent&&!checked.has(parent)){await this.assertChannel(parent);checked.add(parent);}}
+    for(const event of raw){
+      // Native Buzz DMs are NIP-29 groups. Their discovery snapshots use d,
+      // not h; a stale participant tag alone must not establish current access.
+      const dm=event.kind===39000&&event.tags.some(t=>t[0]==='t'&&t[1]==='dm');
+      const coordinates=dm?event.tags.filter(t=>t[0]==='d'):[];
+      if(dm&&(coordinates.length!==1||!channelId.safeParse(coordinates[0]?.[1]).success))throw new ReaderError('INVALID_EVENT','DM metadata has invalid channel provenance.');
+      const parent=eventChannel(event)??coordinates[0]?.[1];
+      if(parent&&!checked.has(parent)){await this.assertChannel(parent);checked.add(parent);}
+    }
     const sorted = raw.sort((a,b)=>b.created_at-a.created_at||a.id.localeCompare(b.id));
     const candidates = sorted.filter(e=>!(cursor&&e.created_at===cursor.until&&cursor.seen.includes(e.id)));
     if(cursor&&candidates.length===0&&raw.length===500) {
@@ -57,7 +63,10 @@ export class BuzzReader {
       warning:'Live data may change between pages. Edited/deleted events are not reconciled into the current UI view.'};
   }
   async channels(options:PageOptions={}) { return this.page({kinds:[39000]},options); }
-  async dms(options:PageOptions={}) { return this.page({kinds:[41001],'#p':[this.client.pubkey]},options); }
+  async dms(options:PageOptions={}) {
+    const result=await this.page({kinds:[39000],'#t':['dm'],'#p':[this.client.pubkey]},options);
+    return {...result,coverage:'Native Buzz channel DMs only. Standard encrypted Nostr DMs (NIP-04/NIP-17) are unsupported; empty results do not establish their absence.'};
+  }
   async history(id:string,options:PageOptions&{since?:number;until?:number}={}) {
     await this.assertChannel(id);
     return this.page({kinds:MESSAGE_KINDS,'#h':[id],...(options.since!==undefined?{since:options.since}:{}),...(options.until!==undefined?{until:options.until}:{})},options);

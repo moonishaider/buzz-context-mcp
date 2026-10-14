@@ -17,7 +17,7 @@ export type Filter = {
   [tag: `#${string}`]: string[] | undefined;
 };
 export const MESSAGE_KINDS = [9, 40002, 40003, 40008, 45001, 45003];
-export const READ_KINDS = new Set([0, 9, 39000, 39002, 41001, 40002, 40003, 40008,
+export const READ_KINDS = new Set([0, 9, 39000, 39002, 40002, 40003, 40008,
   45001, 45003, 40100, 30023, 30621, 30617, 1621, 1617, 1630, 1631, 1632, 1633]);
 export function tags(event: Event, key: string): string[] {
   return event.tags.filter(t => t[0] === key && t[1] !== undefined).map(t => t[1]!);

@@ -6,7 +6,7 @@ import { BuzzClient, boundedBody } from '../src/client.js';
 import { BuzzReader } from '../src/reader.js';
 import { createServer } from '../src/server.js';
 import { authHeader, hash, normalizeRelay } from '../src/protocol.js';
-import { fixture,A,B } from './fixture.js';
+import { fixture,A,B,DM } from './fixture.js';
 
 test('two synthetic identities cannot cross private history, IDs, DMs, search, threads or attachments',async t=>{
   const f=await fixture();t.after(f.close);
@@ -75,6 +75,7 @@ test('MCP handshake advertises only read tools and rejects unauthorized/tool inj
   const result=await client.callTool({name:'read_channel_history',arguments:{channel_id:B}});assert.equal(result.isError,true);assert.doesNotMatch(JSON.stringify(result),/bob-only-marker/);
   const good=await client.callTool({name:'read_channel_history',arguments:{channel_id:A}});assert.match(JSON.stringify(good),/alice-only-marker/);
   assert.doesNotMatch(JSON.stringify(good),/nsec|private diagnostic/);
+  const status=await client.callTool({name:'connection_status',arguments:{}});assert.match(JSON.stringify(status),/unsupported_features.*encrypted DMs/);
 });
 test('long event content is retrieved in bounded immutable chunks with fresh access checks',async t=>{
   const f=await fixture();t.after(f.close);const client=new BuzzClient(f.origin,f.alice,{testLoopback:true});t.after(()=>client.dispose());const reader=new BuzzReader(client);
@@ -91,4 +92,17 @@ test('Buzz direct-reply and nested NIP-10 markers resolve the actual thread root
   f.events.push(root,direct,nested);
   const first=await reader.thread(direct.id,A);assert.equal(first.root.event_id,root.id);assert.ok(first.events.some(e=>e.event_id===nested.id));
   const second=await reader.thread(nested.id,A);assert.equal(second.root.event_id,root.id);
+});
+
+test('native DM discovery uses group metadata and stale participant snapshots cannot grant access',async t=>{
+  const f=await fixture();t.after(f.close);const client=new BuzzClient(f.origin,f.alice,{testLoopback:true});t.after(()=>client.dispose());const reader=new BuzzReader(client);
+  const page=await reader.dms();assert.equal(page.events.length,1);
+  assert.equal(page.events[0]!.kind,39000);assert.ok(page.events[0]!.tags.some(t=>t[0]==='d'&&t[1]===DM));
+  assert.match(page.coverage,/encrypted.*unsupported/);
+  assert.deepEqual(f.requests.find(r=>r.filter?.['#t'])?.filter?.kinds,[39000]);
+  f.allowed.get(f.ap)!.delete(DM);
+  // Simulate a stale discovery snapshot; current membership must be rechecked.
+  const query=client.query.bind(client);
+  client.query=async filter=>filter['#t']? [f.sign(39000,'',[['d',DM],['t','dm'],['p',f.ap],['private']])]:query(filter);
+  await assert.rejects(()=>reader.dms(),/accessible channel\/DM/);
 });

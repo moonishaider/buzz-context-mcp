@@ -5,12 +5,13 @@ import { hash, tags, type Filter } from '../src/protocol.js';
 export const A='11111111-1111-4111-8111-111111111111';
 export const B='22222222-2222-4222-8222-222222222222';
 export const PUBLIC='33333333-3333-4333-8333-333333333333';
+export const DM='44444444-4444-4444-8444-444444444444';
 export async function fixture(){
   const alice=generateSecretKey(),bob=generateSecretKey(),relayKey=generateSecretKey();
   const ap=getPublicKey(alice),bp=getPublicKey(bob);
-  const allowed=new Map([[ap,new Set([A,PUBLIC])],[bp,new Set([B,PUBLIC])]]);
+  const allowed=new Map([[ap,new Set([A,PUBLIC,DM])],[bp,new Set([B,PUBLIC])]]);
   const sign=(kind:number,content:string,t:string[][]=[],time=1700000000)=>finalizeEvent({kind,content,tags:t,created_at:time},relayKey);
-  const metadata=[sign(39000,'',[['d',A],['private'],['name','Alice private']]),sign(39000,'',[['d',B],['private']]),sign(39000,'',[['d',PUBLIC],['public']])];
+  const metadata=[sign(39000,'',[['d',A],['private'],['name','Alice private']]),sign(39000,'',[['d',B],['private']]),sign(39000,'',[['d',PUBLIC],['public']]),sign(39000,'',[['d',DM],['private'],['hidden'],['t','dm'],['p',ap]])];
   const events:Event[]=[sign(9,'alice-only-marker',[['h',A]]),sign(9,'bob-only-marker',[['h',B]]),sign(9,'public-marker',[['h',PUBLIC]]),sign(0,JSON.stringify({name:'Synthetic user'}))];
   const blobs=new Map<string,{bytes:Uint8Array;type:string}>();const replays=new Set<string>();const requests:{method?:string;path:string;filter?:Filter;auth?:Event}[]=[];
   let leaked:Event|undefined;let redirect=false;let oversized=false;let status=200;
@@ -41,8 +42,7 @@ export async function fixture(){
     requests.at(-1)!.filter=filter;
     const acl=allowed.get(auth.pubkey)??new Set<string>();
     const memberships=[...acl].map(id=>sign(39002,'',[['d',id],['p',auth.pubkey]]));
-    const dms=[...acl].filter(id=>id!==PUBLIC).map(id=>sign(41001,'',[['d',id],['p',auth.pubkey]]));
-    const visible=[...metadata.filter(e=>acl.has(tags(e,'d')[0]!)),...memberships,...dms,...events.filter(e=>!tags(e,'h')[0]||acl.has(tags(e,'h')[0]!))];
+    const visible=[...metadata.filter(e=>acl.has(tags(e,'d')[0]!)),...memberships,...events.filter(e=>!tags(e,'h')[0]||acl.has(tags(e,'h')[0]!))];
     const matches=(e:Event)=>filter.kinds.includes(e.kind)&&(!filter.ids||filter.ids.includes(e.id))&&(!filter.authors||filter.authors.includes(e.pubkey))&&
       (filter.since===undefined||e.created_at>=filter.since)&&(filter.until===undefined||e.created_at<=filter.until)&&
       (!filter.search||e.content.includes(filter.search))&&Object.entries(filter).every(([key,value])=>!key.startsWith('#')||(value as string[]).some(v=>tags(e,key.slice(1)).includes(v)));
