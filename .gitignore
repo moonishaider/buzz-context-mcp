@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+*.tgz
+.env*
+!.env.example
+*.key
+*.nsec
+*.ncryptsec
+.DS_Store
+
+.installation.json

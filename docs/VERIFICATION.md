@@ -1,0 +1,47 @@
+# Verification status
+
+Private alpha. Public release is not approved. Implementation is on the feature branch and draft PR; main remains initialization-only.
+
+Full local package checks at d19c1adecae238ed9ed59e716a68ff953e2d40ad passed all 19 tests on macOS ARM64/Node 24.14, including native credential storage/removal, bounded extraction, protocol isolation, pagination and direct/nested thread-marker regression. Production source has not changed since that check.
+
+At e336bded297177197675b22dea3619b048d5d91d all five CI jobs passed: macOS, Windows and Ubuntu package checks, native secure-store checks (including Linux Secret Service), and the official Buzz 0.2.1 disposable-relay access tests. [Exact run](https://github.com/moonishaider/buzz-context-mcp/actions/runs/38475710829).
+
+Actual-relay checks covered private histories, direct-ID denial, negative search, threads, parent access denial, membership removal/revocation and DM isolation. The relay image is pinned to sha256:848fbf014382f152f126af5c85437cdcbe4f205126ef9a89f5f0133a421a2cfa (OCI revision 6e5c462ac524de60d7edb46c66130fd779cc9006). No production relay was changed.
+
+The strengthened real-relay test additionally checks positive search, own-DM discovery and uploaded-image retrieval. At cbbe45df385a53758d92079a12b17823d8622f15 image upload and parent creation reached extraction, but the parser subprocess exited because this independent CI job omitted the build step. The workflow now builds before integration. Its new result is pending; it is not yet a passing attachment acceptance claim.
+
+Installed Codex performed real model/tool calls against synthetic content: allowed retrieval succeeded and another user's private channel returned ACCESS_DENIED. Installed Claude Code completed an isolated MCP handshake. Claude model-driven testing is pending authorization to use the currently logged-in company account, or a personal login. No company-account model request was made.
+
+No human Buzz key was provisioned or real-client workflow tested on every OS. Human/UI parity, supported encryption/edit/thread limits and final release review remain required. Both repositories stay private; no package is published. Synthetic and fixture passes do not establish perfect or complete live coverage.
+
+## October 14 completion work
+
+At code commit **79dca42197b085bd13e22551b9860261bf5f6dbe**, the complete local package checks passed all **20 tests** on macOS ARM64/Node 24.14, including the native credential-store round trip and new DM-discovery/revocation regression. One earlier local attempt timed out in the large pagination fixture; the complete rerun and the subsequent committed-state run both passed. No production timeout limit was loosened.
+
+All five jobs passed in [run 38564390325](https://github.com/moonishaider/buzz-context-mcp/actions/runs/38564390325) at that exact commit: macOS/Windows/Linux package checks, Linux Secret Service checks, and the stronger pinned official Buzz relay integration suite. The stronger suite passed private histories/direct IDs, positive/private search, explicit threads, uploaded-image extraction/private-parent denial, membership revocation and positive/private native DM discovery. It used disposable identities and synthetic content only.
+
+The DM failure was a connector defect: it queried legacy kind:41001 instead of the pinned relay's kind:39000 metadata tagged t=dm with participant p tags. The fixture now models those native snapshots. Returned DM discovery metadata is checked against current membership so stale participants cannot authorize access. See SOURCES.md for exact upstream provenance. The earlier pending/failing attachment/DM evidence above is historical and is superseded by this successful stronger suite.
+
+An actual **Codex CLI 0.162.0** model-driven synthetic workflow passed on macOS using a temporary configuration and code built from the exact code commit. Observed tool responses established allowed history, ACCESS_DENIED for the other identity's channel, extracted synthetic attachment text and native DM discovery with explicit encryption limitations. This is fixture-based model/tool evidence, not a human Buzz/UI pilot or complete install/provision/disconnect acceptance.
+
+An authorized limited **Claude Code 2.1.132** synthetic attempt ran from a neutral temporary directory with no built-in file/shell tools, no plugins, temporary MCP configuration and a minimal inherited environment. It failed with **401 OAuth access token expired** before any model response or MCP call; reported model token usage and cost were zero. No real workspace messages, addresses, keys, repository documents or organization names were supplied as test content. Login presence alone does not establish a usable account. A human login refresh is needed before retrying. Account usage/admin visibility is not guaranteed by the connector.
+
+The dependency audit reported zero advisories. Package-manifest review found only compiled source and intended docs/license metadata; fixtures, CI scripts and scratch files were excluded. This scoped review is not an independent security audit.
+
+After the human refreshed the authorized company login, an actual **Claude Code 2.1.132 / Sonnet 4.6** model/tool check passed against the same committed-code synthetic endpoint on macOS. Observed MCP tool results established allowed history, ACCESS_DENIED for the other identity's channel, extracted synthetic file text and native DM discovery with coverage limits. Initialization showed only the 13 fixture MCP tools and no plugins; no built-in filesystem/shell tools were enabled. The CLI reported 5 turns and estimated usage cost USD 0.0451212; that is a CLI usage estimate, not proof of an additional invoice charge on the team subscription. No further company-account calls are needed for this bounded smoke check. This remains synthetic evidence, not a real-data Claude pilot.
+
+Remaining acceptance: first-human read-only pilot per PILOT.md, native Windows/Linux authenticated real-client checks for both clients, support/limitation approval, exact final artifact review, private-reporting setup and separate publication approval. No real Buzz credentials or permanent client registrations were changed.
+
+## Browser setup candidate (October 15 local date)
+
+Version 0.1.0-alpha.2 adds browser/Terminal choice and automatic source-version recording. All 29 local package tests passed on macOS ARM64 with Node 24.14.0 and native keyring tests enabled on the pre-commit working tree. This includes host/origin/token/content-type rejection, body limits, concurrent/reused session rejection, cancellation/expiry, identity/auth failure, rollback after expiry during secure storage, partial storage cleanup and refusal of piped Terminal secrets.
+
+An isolated Chrome browser submitted a freshly generated disposable identity through the actual local form and shared provisioning implementation. It showed Connected, cleared secret fields and returned no console warnings/errors. The matching key was independently read from the OS credential store and then removed, and temporary public configuration was removed. Relay discovery/query methods were mocked for this browser fixture; this is browser-to-native-storage integration evidence, not a real-relay or human-account pilot. The form was visually inspected at 375px width. A separate desktop/dark capture was not completed because the CLI browser session closed; no dark-mode visual acceptance is claimed.
+
+The repo-link-only entrypoint awaits maintainer-approved merge to the default branch; it is not usable from initialization-only main yet. Cross-platform CI and clean-checkout preparation are being run on the committed candidate and must be reported separately. No real key provisioning or permanent MCP registration was performed.
+
+The clean-checkout `npm run prepare-local` path subsequently passed at **d1dd8e30dfe7b2776f90277639eb8977c4364def** with all **29 tests**, zero skips, native keyring enabled, complete types/lint/build, and zero advisories reported by the locked install. It wrote the expected ignored `.installation.json` record for version 0.1.0-alpha.2, that exact commit, Node v24.14.0 and darwin. It did not provision a real identity or modify client registration. This committed-source evidence supersedes the pre-commit-only local status above. CI run status is reported separately in the PR.
+
+The first browser-candidate Ubuntu package job failed because the new partial-write cleanup test constructed a native credential entry in the generic Linux job, which intentionally has no Secret Service. It did not reach the mocked entry methods. The test now uses the same native-store opt-in as the existing round-trip tests; the dedicated Linux Secret Service job still runs it. This changes test placement only and does not relax production storage checks. macOS and official-relay jobs had passed on that candidate. The rerun is required before claiming all jobs pass.
+
+After the native-test placement fix, all 29 local tests (zero skips), types, lint and build passed at **9a3a8f0222dd51b9acb38fc9bfdbbe2f6e56b3dc** with native keyring enabled. Production source is unchanged from d1dd8e30dfe7b2776f90277639eb8977c4364def; the intervening changes are documentation and the test's native-store opt-in. The prior successful clean-preparation/browser evidence therefore applies to the same production source, while CI results must be attributed to their own candidate.

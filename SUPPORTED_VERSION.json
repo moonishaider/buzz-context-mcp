@@ -1,0 +1,8 @@
+{
+  "version": "0.1.0-alpha.2",
+  "channel": "private-alpha",
+  "source": "repository-default-branch",
+  "packagePublished": false,
+  "setupMethods": ["browser", "terminal"],
+  "fullHumanPilotPlatforms": []
+}
