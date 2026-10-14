@@ -7,9 +7,9 @@
 - [x] 35-test document-reader checks and all five merged-baseline CI jobs passed; exact references in VERIFICATION.md.
 - [x] Scoped macOS real history/transcript acceptance recorded without private content.
 - [x] Source setup, skills installation and support limits documented without pre-merge blockers.
-- [ ] Final outgoing attribution, reachable history, dependencies and artifact review recorded.
-- [ ] Final clean preparation and anonymous public-source retrieval verified.
-- [ ] Private vulnerability reporting verified on both public repositories.
+- [x] Final outgoing attribution, reachable history, dependencies and artifact review recorded.
+- [x] Final clean preparation and anonymous public-source retrieval verified.
+- [x] Private vulnerability reporting verified on both public repositories.
 
 ## General stable rollout — incomplete
 
