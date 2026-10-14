@@ -15,7 +15,8 @@
 
 - [ ] Fresh human teammate setup and full intended workflow verified on each advertised stable environment.
 - [ ] Native Windows/Linux authenticated Codex/Claude workflows accepted.
-- [ ] Real-data Claude workflow and skill discovery accepted.
+- [x] Current macOS Codex/Claude synthetic retrieval and three-skill discovery/use checked.
+- [ ] Real-data Claude human workflow and summary quality accepted.
 - [ ] Broader UI-parity checks completed; unsupported features remain explicit.
 
 Keep `private: true` for source-only distribution. npm publication would require its own review and authorization. CI and model summaries do not replace authenticated human workflow evidence.

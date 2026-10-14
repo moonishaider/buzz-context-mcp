@@ -2,7 +2,7 @@
 
 An independent, read-only connector that lets a local coding assistant search and read the Buzz conversations and supported uploads your account can access.
 
-**Public source alpha, version 0.1.0-alpha.3.** Scoped real-data use is verified on macOS with Codex. Claude Code has synthetic model/tool acceptance on macOS. Windows/Linux have automated package and credential-store checks, but authenticated client setup remains experimental. This is not a general stable release. See [verification and support](docs/VERIFICATION.md).
+**Public source alpha, version 0.1.0-alpha.3.** Scoped real-data use is verified on macOS with Codex. Both local Codex and Claude Code passed current synthetic retrieval and three-skill discovery/use checks on macOS; Claude real-data acceptance and summary-quality acceptance remain unverified. Windows/Linux have automated package and credential-store checks, but authenticated client setup remains experimental. This is not a general stable release. See [verification and support](docs/VERIFICATION.md).
 
 ## Set up the connector and skills
 
